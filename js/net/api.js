@@ -98,6 +98,8 @@ export const api = {
   challenges: () => request("/api/arena/challenges"),
   respond: (challengeId, accept) =>
     request("/api/arena/respond", { method: "POST", body: { challengeId, accept } }),
+  cancelChallenge: (challengeId) =>
+    request("/api/arena/cancel", { method: "POST", body: { challengeId } }),
   feed: () => request("/api/arena/feed", { auth: false }),
   rankings: () => request("/api/rankings", { auth: false }),
   lobby: () => request("/api/lobby", { auth: false })

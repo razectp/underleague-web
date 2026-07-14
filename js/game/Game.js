@@ -38,6 +38,7 @@ import {
 import { upgradeFacility } from "../systems/facilities.js";
 import { claimSeasonGoal, seasonGoalsSummary } from "../systems/seasonGoals.js";
 import { ledgerSummary } from "../systems/finance.js";
+import { processNpcDay } from "../systems/npcAi.js";
 
 export class Game {
   constructor() {
@@ -76,6 +77,7 @@ export class Game {
   hydrate(rawState) {
     this.state = migrateState(rawState);
     if (!this.state.seasonFixtures?.length) generateFixtures(this);
+    processNpcDay(this);
     ensureDailyMissions(this);
     if (!this.state.lineup?.starters?.length) autoFillLineup(this);
     this.emit();
@@ -99,6 +101,7 @@ export class Game {
       clubType: opts.clubType
     });
     generateFixtures(this);
+    processNpcDay(this);
     ensureDailyMissions(this);
     autoFillLineup(this);
     this.log(

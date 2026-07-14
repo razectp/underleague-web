@@ -20,7 +20,7 @@ export function viewCompete(game, s) {
   const tabs = [
     { id: "liga", label: "Liga local", hint: "Rodada oficial" },
     { id: "circuito", label: "Circuito", hint: "Treino PvE" },
-    { id: "arena", label: "Arena PvP", hint: "Outros clubes" }
+    { id: "arena", label: "Arena online", hint: "Clubes e rivais" }
   ];
 
   const tabBar = tabs

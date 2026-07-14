@@ -59,7 +59,7 @@ export function viewClub(game, s) {
         </p>
         <div class="btn-row" style="margin-top:0.75rem">
           <button class="btn btn-secondary btn-sm" data-go="squad">Ver elenco</button>
-          <button class="btn btn-primary btn-sm" data-go="compete" data-compete-tab="arena">Arena PvP</button>
+          <button class="btn btn-primary btn-sm" data-go="compete" data-compete-tab="arena">Arena online</button>
         </div>
       </div>
     </div>

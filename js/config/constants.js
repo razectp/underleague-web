@@ -3,7 +3,7 @@
  * Altere números de balanceamento e catálogos aqui.
  */
 
-export const VERSION = 6;
+export const VERSION = 7;
 
 /** O mundo avança 24 horas de jogo a cada 5 horas reais do servidor. */
 export const REAL_MS_PER_GAME_DAY = 5 * 60 * 60 * 1000;

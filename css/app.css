@@ -175,6 +175,47 @@
   align-items: center;
 }
 
+@media (max-width: 680px) {
+  .arena-opponents {
+    overflow-x: visible;
+  }
+
+  .arena-opponents table.data,
+  .arena-opponents table.data tbody,
+  .arena-opponents table.data tr,
+  .arena-opponents table.data td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .arena-opponents table.data thead {
+    display: none;
+  }
+
+  .arena-opponents table.data tr {
+    margin-top: 0.75rem;
+    padding: 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+
+  .arena-opponents table.data td {
+    padding: 0.25rem 0;
+    border: 0;
+    text-align: left;
+  }
+
+  .arena-opponents table.data td:last-child {
+    padding-top: 0.65rem;
+  }
+
+  .arena-opponents table.data td:last-child .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
 .mobile-nav-toggle {
   display: none;
 }

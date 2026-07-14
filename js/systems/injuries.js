@@ -13,17 +13,17 @@ export function injureBoss(game) {
   game.log(`Lesão: ${type.name} (~${days} dias).`, "bad");
 }
 
-export function injurePlayer(game, p, forceType) {
+export function injurePlayer(game, p, forceType, ownerClub = game.state.club) {
   const type = forceType || pick(INJURY_TYPES);
   let days = rand(type.min, type.max);
   // médico do clube reduz dias
-  const med = game.state.club?.facilities?.medical || 1;
+  const med = ownerClub?.facilities?.medical || 1;
   days = Math.max(1, days - Math.max(0, med - 1));
   p.injury = { id: type.id, name: type.name, daysLeft: days, severity: type.severity };
   p.stamina = Math.min(p.stamina, 20);
   p.form = clamp(p.form - 10, 10, 99);
   game.log(`${p.name} — ${type.name} (${days}d).`, "bad");
-  game.feed(`${p.name} é dúvida no elenco de ${game.state.club.name}.`);
+  game.feed(`${p.name} é dúvida no elenco de ${ownerClub?.name || game.state.club.name}.`);
 }
 
 export function healDayTick(game) {

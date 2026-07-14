@@ -5,6 +5,7 @@
 import { VERSION, STYLES, PRACAS, CLUB_TYPES, STANDARD_OPPONENTS, SEASON_THEMES } from "../config/constants.js";
 import { generatePlayer, generateSquad, generateSquadAtOverall, playerName, refreshPlayerDerived } from "../data/generators.js";
 import { emptyBossSkillXp } from "../systems/skillProgress.js";
+import { ensureNpcAiState } from "../systems/npcAi.js";
 import { rand, uid } from "../core/utils.js";
 
 function emptyRecord() {
@@ -315,6 +316,7 @@ export function migrateState(state) {
   if (!state.lineup) state.lineup = { starters: [], bench: [], auto: true };
   if (!state.ledger) state.ledger = [];
   if (!state.tutorial) state.tutorial = { step: 0, done: false };
+  ensureNpcAiState(state);
   if (state.club && !state.club.facilities) {
     state.club.facilities = { training: 1, medical: 1, stadium: 1 };
   }

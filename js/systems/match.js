@@ -1,6 +1,6 @@
 import { MATCH_ENERGY_COST, SEASON_THEMES } from "../config/constants.js";
 import { refreshPlayerDerived } from "../data/generators.js";
-import { rand, pick, chance, clamp, formatMoney } from "../core/utils.js";
+import { rand, clamp, formatMoney } from "../core/utils.js";
 import { injurePlayer } from "./injuries.js";
 import { bestXI, tacticalMatchup, teamStrength } from "./tactics.js";
 import { ensurePlayerStats, ensureClubStats, clubRankings } from "./rankings.js";
@@ -11,6 +11,7 @@ import { pushLedger } from "./finance.js";
 import { homeGateBonus } from "./facilities.js";
 import { evolveNpcs } from "./npcEvolve.js";
 import { ensureSeasonGoals } from "./seasonGoals.js";
+import { recordNpcIncome } from "./npcAi.js";
 
 /** Temporada completa em turno e returno: todos os clubes jogam em cada rodada. */
 export function generateFixtures(game) {
@@ -85,6 +86,13 @@ function findPlayerById(game, id) {
   );
 }
 
+function findPlayerClub(game, playerId) {
+  if (game.state.squad.some((player) => player.id === playerId)) return game.state.club;
+  return game.state.npcs.find((club) =>
+    (club.squad || []).some((player) => player.id === playerId)
+  );
+}
+
 function pushForm(club, letter) {
   ensureClubStats(club);
   club.form = club.form || [];
@@ -117,66 +125,122 @@ function simulateNpcFixture(game, fixture) {
   if (fixture.played) return;
   const home = game.getClub(fixture.home);
   const away = game.getClub(fixture.away);
+  const satOutHome = new Set(
+    (home.squad || []).filter((p) => p.suspension?.matchesLeft > 0).map((p) => p.id)
+  );
+  const satOutAway = new Set(
+    (away.squad || []).filter((p) => p.suspension?.matchesLeft > 0).map((p) => p.id)
+  );
   const homeXI = bestXI(game.getSquad(home.id), home.formation);
   const awayXI = bestXI(game.getSquad(away.id), away.formation);
+  if (homeXI.length < 11 || awayXI.length < 11) {
+    const hg = homeXI.length >= 11 ? 3 : 0;
+    const ag = awayXI.length >= 11 ? 3 : 0;
+    const consume = (squad, ids) => squad.forEach((player) => {
+      if (!ids.has(player.id) || !player.suspension) return;
+      player.suspension.matchesLeft -= 1;
+      if (player.suspension.matchesLeft <= 0) player.suspension = null;
+    });
+    consume(home.squad || [], satOutHome);
+    consume(away.squad || [], satOutAway);
+    registerSimpleResult(home, away, hg, ag);
+    recordNpcIncome(game.state, home, hg > ag ? 650 : hg === ag ? 350 : 200, "match");
+    recordNpcIncome(game.state, away, ag > hg ? 650 : ag === hg ? 350 : 200, "match");
+    fixture.played = true;
+    fixture.result = {
+      hg,
+      ag,
+      events: [{ min: 0, kind: "walkover", drama: true, text: "Partida decidida por ausência de atletas aptos." }]
+    };
+    return;
+  }
   const homeFit = tacticalMatchup(home, away).multiplier;
   const awayFit = tacticalMatchup(away, home).multiplier;
   const hp = teamStrength(homeXI, home, null) * homeFit * 1.025;
   const ap = teamStrength(awayXI, away, null) * awayFit;
-  const share = hp / Math.max(1, hp + ap);
-  let hg = 0;
-  let ag = 0;
-  for (let i = 0; i < 14; i++) {
-    if (!chance(38)) continue;
-    const homeAttack = chance(share * 100);
-    const diff = homeAttack ? hp - ap : ap - hp;
-    if (!chance(clamp(20 + diff * 0.35, 8, 44))) continue;
-    if (homeAttack) hg += 1;
-    else ag += 1;
-  }
+  const benchFor = (club, xi) => {
+    const used = new Set(xi.map((player) => player.id));
+    return bestXI(
+      (club.squad || []).filter((player) => !used.has(player.id)),
+      club.formation
+    ).slice(0, 7);
+  };
+  const sim = simulateMatchNarrative({
+    homeName: home.name,
+    awayName: away.name,
+    homeXI,
+    awayXI,
+    homeStr: hp,
+    awayStr: ap,
+    homeMentality: home.mentality,
+    awayMentality: away.mentality,
+    homeBench: benchFor(home, homeXI),
+    awayBench: benchFor(away, awayXI)
+  });
+  const { hg, ag, goalsById, assistsById, injuryMarks } = sim;
+
+  Object.entries(goalsById || {}).forEach(([id, count]) => {
+    const player = findPlayerById(game, id);
+    if (!player) return;
+    ensurePlayerStats(player);
+    player.goals += count;
+    player.seasonGoals += count;
+  });
+  Object.entries(assistsById || {}).forEach(([id, count]) => {
+    const player = findPlayerById(game, id);
+    if (!player) return;
+    ensurePlayerStats(player);
+    player.assists += count;
+    player.seasonAssists += count;
+  });
+
+  (injuryMarks || []).forEach((mark) => {
+    const player = findPlayerById(game, mark.playerId);
+    if (player && !player.injury) {
+      injurePlayer(game, player, undefined, findPlayerClub(game, player.id));
+    }
+  });
+  applyDisciplineFromMatch(home.squad || [], sim.discipline || {});
+  applyDisciplineFromMatch(away.squad || [], sim.discipline || {});
+
+  const clearSatOut = (squad, ids) => squad.forEach((player) => {
+    if (!ids.has(player.id) || !player.suspension) return;
+    player.suspension.matchesLeft -= 1;
+    if (player.suspension.matchesLeft <= 0) player.suspension = null;
+  });
+  clearSatOut(home.squad || [], satOutHome);
+  clearSatOut(away.squad || [], satOutAway);
 
   const updateNpcXI = (xi, goals, conceded) => {
-    const goalCount = new Map();
-    const assistCount = new Map();
     xi.forEach((p) => {
       const real = findPlayerById(game, p.id);
       if (!real) return;
       ensurePlayerStats(real);
       real.games += 1;
       real.seasonGames += 1;
-    });
-    for (let i = 0; i < goals; i++) {
-      const pool = xi.filter((p) => ["ATA", "PE", "PD", "MEI"].includes(p.pos));
-      const scorer = findPlayerById(game, pick(pool.length ? pool : xi)?.id);
-      if (scorer) {
-        scorer.goals += 1;
-        scorer.seasonGoals += 1;
-        goalCount.set(scorer.id, (goalCount.get(scorer.id) || 0) + 1);
-        const helpers = xi.filter((p) => p.id !== scorer.id && ["ATA", "PE", "PD", "MEI", "MC"].includes(p.pos));
-        if (helpers.length && chance(62)) {
-          const assister = findPlayerById(game, pick(helpers).id);
-          if (assister) {
-            assister.assists += 1;
-            assister.seasonAssists += 1;
-            assistCount.set(assister.id, (assistCount.get(assister.id) || 0) + 1);
-          }
-        }
-      }
-    }
-    xi.forEach((p) => {
-      const real = findPlayerById(game, p.id);
-      if (!real) return;
+      const scored = goalsById?.[real.id] || 0;
+      const assisted = assistsById?.[real.id] || 0;
+      real.stamina = clamp((real.stamina || 0) - rand(24, 37), 0, real.maxStamina || 100);
+      real.form = clamp((real.form || 60) + (goals > conceded ? 3 : goals === conceded ? 1 : -2), 15, 99);
+      real.morale = clamp((real.morale || 60) + (goals > conceded ? 4 : goals === conceded ? 1 : -3), 10, 100);
       const resultBonus = goals > conceded ? 0.35 : goals === conceded ? 0.05 : -0.25;
-      const rating = clamp(6.2 + resultBonus + (goalCount.get(p.id) || 0) * 0.85 + (assistCount.get(p.id) || 0) * 0.5 + rand(-20, 20) / 100, 4.5, 10);
+      const rating = clamp(6.2 + resultBonus + scored * 0.85 + assisted * 0.5 + rand(-20, 20) / 100, 4.5, 10);
       real.ratingSum += rating;
       real.ratingCount += 1;
+      refreshPlayerDerived(real);
     });
   };
-  updateNpcXI(homeXI, hg, ag);
-  updateNpcXI(awayXI, ag, hg);
+  const substitutes = (side, club) => (sim.events || [])
+    .filter((event) => event.kind === "sub" && event.side === side && event.inPlayerId)
+    .map((event) => (club.squad || []).find((player) => player.id === event.inPlayerId))
+    .filter(Boolean);
+  updateNpcXI([...homeXI, ...substitutes("home", home)], hg, ag);
+  updateNpcXI([...awayXI, ...substitutes("away", away)], ag, hg);
   registerSimpleResult(home, away, hg, ag);
+  recordNpcIncome(game.state, home, 350 + (home.prestige || 0) * 12 + (hg > ag ? 650 : hg === ag ? 350 : 200), "match");
+  recordNpcIncome(game.state, away, ag > hg ? 650 : ag === hg ? 350 : 200, "match");
   fixture.played = true;
-  fixture.result = { hg, ag, events: [] };
+  fixture.result = { hg, ag, events: sim.events || [] };
 }
 
 function simulateRestOfRound(game, round, playerFixture) {
@@ -191,6 +255,11 @@ function startNextSeason(game) {
   const champion = table[0];
   const rank = mine?.rank || table.length;
   const reward = rank === 1 ? 7000 : rank <= 3 ? 3500 : rank <= 5 ? 1800 : 900;
+  table.filter((row) => !row.you).forEach((row) => {
+    const club = game.state.npcs.find((npc) => npc.id === row.id);
+    const npcReward = row.rank === 1 ? 7000 : row.rank <= 3 ? 3500 : row.rank <= 5 ? 1800 : 900;
+    recordNpcIncome(game.state, club, npcReward, "season");
+  });
   game.state.club.bank += reward;
   pushLedger(game, { type: "season", amount: reward, label: `Prêmio temporada (${rank}º)` });
   // meta top half
@@ -284,6 +353,14 @@ export function playNextMatch(game) {
     ? getStartingXI(game)
     : bestXI(game.getSquad(fixture.away), awayClub.formation);
   const playerBench = homeIsPlayer || awayIsPlayer ? getBenchPlayers(game) : [];
+  const npcBenchFor = (club, xi) => {
+    const used = new Set(xi.map((player) => player.id));
+    return bestXI(
+      (club.squad || []).filter((player) => !used.has(player.id)),
+      club.formation
+    ).slice(0, 7);
+  };
+  const opponentClub = homeIsPlayer ? awayClub : homeClub;
 
   if (homeIsPlayer && homeXI.length < 11) {
     return { ok: false, msg: "Menos de 11 aptos no XI. Ajuste a escalação." };
@@ -291,15 +368,19 @@ export function playNextMatch(game) {
   if (awayIsPlayer && awayXI.length < 11) {
     return { ok: false, msg: "Menos de 11 aptos no XI. Ajuste a escalação." };
   }
+  if (!homeIsPlayer && homeXI.length < 11) {
+    return { ok: false, msg: `${homeClub.name} está sem 11 atletas aptos. A partida foi adiada.` };
+  }
+  if (!awayIsPlayer && awayXI.length < 11) {
+    return { ok: false, msg: `${awayClub.name} está sem 11 atletas aptos. A partida foi adiada.` };
+  }
 
   // Quem já estava suspenso “assiste” este jogo e cumpre 1 pena no fim
   const satOutMine = new Set(
     game.state.squad.filter((p) => p.suspension?.matchesLeft > 0).map((p) => p.id)
   );
   const satOutNpc = new Set(
-    game.state.npcs.flatMap((c) =>
-      (c.squad || []).filter((p) => p.suspension?.matchesLeft > 0).map((p) => p.id)
-    )
+    (opponentClub.squad || []).filter((p) => p.suspension?.matchesLeft > 0).map((p) => p.id)
   );
 
   // Energia e “já jogou hoje” aplicados antes da simulação (anti re-roll)
@@ -329,8 +410,8 @@ export function playNextMatch(game) {
     awayStr,
     homeMentality: homeClub.mentality,
     awayMentality: awayClub.mentality,
-    homeBench: homeIsPlayer ? playerBench : [],
-    awayBench: awayIsPlayer ? playerBench : []
+    homeBench: homeIsPlayer ? playerBench : npcBenchFor(homeClub, homeXI),
+    awayBench: awayIsPlayer ? playerBench : npcBenchFor(awayClub, awayXI)
   });
   const { hg, ag, goalsById, assistsById, injuryMarks } = sim;
   const events = sim.events;
@@ -354,13 +435,15 @@ export function playNextMatch(game) {
   // Lesões decididas na simulação — aplicadas uma vez
   injuryMarks.forEach((mark) => {
     const real = findPlayerById(game, mark.playerId);
-    if (real && !real.injury) injurePlayer(game, real);
+    if (real && !real.injury) {
+      injurePlayer(game, real, undefined, findPlayerClub(game, real.id));
+    }
   });
 
   // Disciplina: vermelho de HOJE → suspenso no PRÓXIMO jogo
   const disc = sim.discipline || { sentOffIds: [], yellowIds: [] };
   applyDisciplineFromMatch(game.state.squad, disc);
-  game.state.npcs.forEach((c) => applyDisciplineFromMatch(c.squad || [], disc));
+  applyDisciplineFromMatch(opponentClub.squad || [], disc);
 
   // Quem já estava suspenso e ficou de fora nesta rodada cumpre 1 jogo
   const clearSatOut = (squad, satIds) => {
@@ -374,7 +457,7 @@ export function playNextMatch(game) {
     });
   };
   clearSatOut(game.state.squad, satOutMine);
-  game.state.npcs.forEach((c) => clearSatOut(c.squad || [], satOutNpc));
+  clearSatOut(opponentClub.squad || [], satOutNpc);
 
   /** Atualiza elenco (seu ou NPC) com apps, nota, forma */
   const updateXI = (xi, won, drew, goalsConceded) => {
@@ -384,12 +467,9 @@ export function playNextMatch(game) {
       const p = findPlayerById(game, shadow.id);
       if (!p) return;
       ensurePlayerStats(p);
-      const isMine = game.state.squad.some((x) => x.id === p.id);
-      if (isMine) {
-        p.stamina = clamp(p.stamina - rand(25, 40), 0, p.maxStamina || 100);
-        p.form = clamp(p.form + (won ? 4 : drew ? 1 : -3) + rand(-1, 2), 15, 99);
-        p.morale = clamp(p.morale + (won ? 5 : drew ? 1 : -4), 10, 100);
-      }
+      p.stamina = clamp(p.stamina - rand(25, 40), 0, p.maxStamina || 100);
+      p.form = clamp(p.form + (won ? 4 : drew ? 1 : -3) + rand(-1, 2), 15, 99);
+      p.morale = clamp(p.morale + (won ? 5 : drew ? 1 : -4), 10, 100);
 
       p.games = (p.games || 0) + 1;
       p.seasonGames = (p.seasonGames || 0) + 1;
@@ -411,7 +491,7 @@ export function playNextMatch(game) {
         bestRating = rating;
         best = p;
       }
-      if (isMine) refreshPlayerDerived(p);
+      refreshPlayerDerived(p);
     });
     if (best && bestRating >= 7.2) {
       best.motm = (best.motm || 0) + 1;
@@ -428,8 +508,13 @@ export function playNextMatch(game) {
   const draw = hg === ag;
   registerSimpleResult(homeClub, awayClub, hg, ag);
 
-  updateXI(homeXI, homeWon, draw, ag);
-  updateXI(awayXI, !homeWon && !draw, draw, hg);
+  const matchSubstitutes = (side, club) => events
+    .filter((event) => event.kind === "sub" && event.side === side && event.inPlayerId)
+    .map((event) => (club.id === game.state.club.id ? game.state.squad : club.squad || [])
+      .find((player) => player.id === event.inPlayerId))
+    .filter(Boolean);
+  updateXI([...homeXI, ...matchSubstitutes("home", homeClub)], homeWon, draw, ag);
+  updateXI([...awayXI, ...matchSubstitutes("away", awayClub)], !homeWon && !draw, draw, hg);
 
   const playerIsHome = fixture.home === game.state.club.id;
   const playerWon = playerIsHome ? homeWon : !homeWon && !draw;
@@ -452,6 +537,13 @@ export function playNextMatch(game) {
   prize += themeBonus;
   if (playerIsHome) prize += homeGateBonus(game.state.club);
   game.state.club.bank += prize;
+  const npcOpponent = playerIsHome ? awayClub : homeClub;
+  const npcGoals = playerIsHome ? ag : hg;
+  const npcConceded = playerIsHome ? hg : ag;
+  const npcMatchIncome =
+    (npcGoals > npcConceded ? 650 : npcGoals === npcConceded ? 350 : 200) +
+    (!playerIsHome ? 350 + (npcOpponent.prestige || 0) * 12 : 0);
+  recordNpcIncome(game.state, npcOpponent, npcMatchIncome, "match");
   pushLedger(game, {
     type: "match",
     amount: prize,

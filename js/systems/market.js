@@ -1,7 +1,8 @@
 import { MARKET_FEE_RATE, SQUAD_MIN, SQUAD_MAX } from "../config/constants.js";
 import { calcValue } from "../data/generators.js";
-import { chance, clamp, pick, formatMoney } from "../core/utils.js";
+import { clamp, formatMoney } from "../core/utils.js";
 import { pushLedger } from "./finance.js";
+import { chooseNpcBuyer, creditLeagueFee, ensureNpcAiState } from "./npcAi.js";
 
 export function buyPlayer(game, playerId) {
   const idx = game.state.market.findIndex((p) => p.id === playerId);
@@ -22,6 +23,11 @@ export function buyPlayer(game, playerId) {
 
   if (useClub) game.state.club.bank -= total;
   else game.state.boss.money -= total;
+  ensureNpcAiState(game.state);
+  const seller = game.state.npcs.find((club) => club.id === p.sellerClubId);
+  if (seller) seller.bank += price;
+  else game.state.economy.marketOutflow += price;
+  creditLeagueFee(game.state, fee);
   pushLedger(game, {
     type: "transfer_in",
     amount: -total,
@@ -31,6 +37,9 @@ export function buyPlayer(game, playerId) {
 
   p.onMarket = false;
   p.clubId = game.state.club.id;
+  delete p.sellerClubId;
+  delete p.listedDay;
+  delete p.lastRepricedDay;
   p.morale = clamp(p.morale + 5, 0, 100);
   if (p.contractYears == null) p.contractYears = 2;
   game.state.squad.push(p);
@@ -57,27 +66,25 @@ export function sellPlayer(game, playerId) {
   const price = Math.floor(calcValue(p) * (0.85 + game.state.boss.stats.negocio / 500));
   const fee = Math.floor(price * MARKET_FEE_RATE);
   const net = price - fee;
+  const buyer = chooseNpcBuyer(game.state, p, price);
+  if (!buyer) {
+    return { ok: false, msg: "Nenhum clube apresentou uma proposta compatível agora." };
+  }
 
   game.state.squad.splice(idx, 1);
+  buyer.bank -= price;
   game.state.club.bank += net;
+  creditLeagueFee(game.state, fee);
   pushLedger(game, { type: "transfer_out", amount: net, label: `Venda ${p.name}` });
   if (game.state.lineup) {
     game.state.lineup.starters = (game.state.lineup.starters || []).filter((id) => id !== playerId);
     game.state.lineup.bench = (game.state.lineup.bench || []).filter((id) => id !== playerId);
   }
 
-  if (chance(40)) {
-    p.clubId = null;
-    p.onMarket = true;
-    p.marketPrice = Math.floor(price * 1.1);
-    game.state.market.push(p);
-  } else {
-    const npc = pick(game.state.npcs);
-    p.clubId = npc.id;
-    p.onMarket = false;
-    npc.squad.push(p);
-    game.feed(`${p.name} acertou com ${npc.name}.`);
-  }
+  p.clubId = buyer.id;
+  p.onMarket = false;
+  buyer.squad.push(p);
+  game.feed(`${p.name} acertou com ${buyer.name}.`);
 
   game.addXp(4);
   game.notify(`Vendeu ${p.name} · líquido R$ ${formatMoney(net)} (taxa 3%).`, "info");

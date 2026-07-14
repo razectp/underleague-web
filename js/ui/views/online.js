@@ -75,11 +75,14 @@ export function viewOnline(game, s, data) {
   const myChallenges = (data.challenges || [])
     .map((c) => {
       if (c.incoming) {
+        const invitationKind = c.fromType === "bot"
+          ? "Rival da liga · amistoso sem pontos de ranking"
+          : "Clube da comunidade · pontuação confirmada no aceite";
         return `
           <div class="action-card">
             <div>
               <h4>${esc(c.fromName)} quer jogar contra você</h4>
-              <p>Clube vs clube · confronto valendo pelo ranking</p>
+              <p>${invitationKind}</p>
             </div>
             <div class="btn-row" style="flex:0;min-width:160px">
               <button class="btn btn-primary btn-sm" data-respond="${c.id}" data-accept="1">Aceitar jogo</button>
@@ -93,32 +96,41 @@ export function viewOnline(game, s, data) {
             <h4>Convite enviado a ${esc(c.toName)}</h4>
             <p>Aguardando o outro clube aceitar...</p>
           </div>
-          <span class="badge warn">pendente</span>
+          <div class="btn-row" style="flex:0;min-width:140px">
+            <span class="badge warn">pendente</span>
+            <button class="btn btn-ghost btn-sm" data-cancel-challenge="${c.id}">Cancelar</button>
+          </div>
         </div>`;
     })
     .join("");
 
-  const players = (data.players || [])
-    .map((p) => {
-      const online = p.online
-        ? `<span class="badge ok">online</span>`
-        : `<span class="badge muted">off</span>`;
+  const renderOpponent = (p) => {
+      const online = p.bot
+        ? `<span class="badge warn">RIVAL DA LIGA</span>`
+        : p.online
+          ? `<span class="badge ok">atividade recente</span>`
+          : `<span class="badge muted">ausente</span>`;
       const save = p.hasSave ? "" : `<span class="badge warn">clube em formação</span>`;
+      const unavailable = p.unavailableReason
+        ? `<br><span style="color:var(--dim);font-size:0.7rem">${esc(p.unavailableReason)}</span>`
+        : "";
+      const disabled = !p.hasSave || p.canChallenge === false;
       return `
         <tr>
           <td>
             <strong>${esc(p.clubName)}</strong>
             <br><span style="color:var(--dim);font-size:0.75rem">técnico: ${esc(p.displayName)}</span>
           </td>
-          <td class="num">★ ${p.rep || 0}</td>
+          <td class="num">${p.bot ? `Nível ${p.difficulty || 1}` : `${p.arenaPoints || 0} pts`}</td>
           <td class="num">${p.wins || 0}V ${p.draws || 0}E ${p.losses || 0}D</td>
-          <td>${online} ${save}</td>
+          <td>${online} ${save}${unavailable}</td>
           <td>
-            <button class="btn btn-secondary btn-sm" data-challenge="${p.id}" ${p.hasSave ? "" : "disabled"}>Desafiar clube</button>
+            <button class="btn btn-secondary btn-sm" data-challenge="${p.id}" ${disabled ? "disabled" : ""} title="${esc(p.unavailableReason || "")}">${p.bot ? "Jogar amistoso" : "Enviar convite"}</button>
           </td>
         </tr>`;
-    })
-    .join("");
+    };
+  const humanPlayers = (data.players || []).filter((player) => !player.bot).map(renderOpponent).join("");
+  const botPlayers = (data.players || []).filter((player) => player.bot).map(renderOpponent).join("");
 
   const feed =
     (data.feed || [])
@@ -134,7 +146,7 @@ export function viewOnline(game, s, data) {
     <h1 class="view-title">Arena de clubes</h1>
     <p class="view-sub"><strong>${esc(myClub)}</strong> na arena · desafie outros clubes</p>
     <div class="btn-row" style="margin-bottom:0.9rem">
-      <button class="btn btn-primary btn-sm" id="btn-sync-cloud" style="width:auto">☁ Publicar elenco</button>
+      <button class="btn btn-primary btn-sm" id="btn-sync-cloud" style="width:auto">Atualizar elenco</button>
       <button class="btn btn-secondary btn-sm" id="btn-refresh-online" style="width:auto">Atualizar</button>
     </div>
     <div class="grid-2">
@@ -147,11 +159,19 @@ export function viewOnline(game, s, data) {
         ${feed}
       </div>
     </div>
-    <div class="panel table-wrap">
-      <h3>Clubes cadastrados</h3>
+    <div class="panel table-wrap arena-opponents">
+      <h3>Dirigentes da comunidade</h3>
       <table class="data">
-        <thead><tr><th>Clube / técnico</th><th>Rep</th><th>Cartola PvP</th><th></th><th></th></tr></thead>
-        <tbody>${players || `<tr><td colspan="5" class="empty">Ainda só o seu time — chame um amigo para fundar o rival.</td></tr>`}</tbody>
+        <thead><tr><th>Clube / técnico</th><th>Arena</th><th>Histórico</th><th></th><th></th></tr></thead>
+        <tbody>${humanPlayers || `<tr><td colspan="5" class="empty">Ainda só o seu time — chame um amigo para fundar o rival.</td></tr>`}</tbody>
+      </table>
+    </div>
+    <div class="panel table-wrap arena-opponents">
+      <h3>Rivais da liga disponíveis</h3>
+      <p style="color:var(--muted);font-size:0.82rem">Clubes controlados pelo jogo. Os amistosos não entram no ranking humano.</p>
+      <table class="data">
+        <thead><tr><th>Clube / comissão</th><th>Dificuldade</th><th>Liga</th><th></th><th></th></tr></thead>
+        <tbody>${botPlayers || `<tr><td colspan="5" class="empty">Nenhum rival disponível agora.</td></tr>`}</tbody>
       </table>
     </div>
     <div class="panel">

@@ -187,6 +187,8 @@ function trySub(side, min, events, reason) {
       min,
       kind: "sub",
       side: side.key,
+      outPlayerId: leaving.id,
+      inPlayerId: incoming.id,
       text: `Substituição (${side.name}): sai ${leaving.name}, entra ${incoming.name}${
         reason === "injury" ? " · lesão" : ""
       }`
@@ -205,6 +207,8 @@ function trySub(side, min, events, reason) {
       min,
       kind: "sub",
       side: side.key,
+      outPlayerId: leaving.id,
+      inPlayerId: subId,
       text: `Substituição (${side.name}): sai ${leaving.name}, entra ${subName}${
         reason === "injury" ? " · lesão" : ""
       }`

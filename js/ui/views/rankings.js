@@ -212,12 +212,23 @@ function renderOnlineShell(st) {
     .map(
       (r, i) => `<tr>
         <td class="num">${i + 1}</td>
-        <td><strong>${esc(r.clubName)}</strong><br><span style="color:var(--dim);font-size:0.72rem">${esc(r.displayName || "")} · PvP ${r.wins || 0}V/${r.draws || 0}E/${r.losses || 0}D</span></td>
+        <td><strong>${esc(r.clubName)}</strong><br><span style="color:var(--dim);font-size:0.72rem">${esc(r.displayName || "")} · Liga ${r.wins || 0}V/${r.draws || 0}E/${r.losses || 0}D</span></td>
         <td class="num">★ ${r.rep || 0}</td>
         <td class="num">${r.pts ?? "—"}</td>
         <td class="num">${r.gpg != null ? Number(r.gpg).toFixed(2) : "—"}</td>
         <td class="num">${r.perf ?? "—"}</td>
         <td class="num">${r.avgOvr ?? "—"}</td>
+      </tr>`
+    )
+    .join("");
+
+  const arena = (cache.arena || [])
+    .map(
+      (r, i) => `<tr>
+        <td class="num">${i + 1}</td>
+        <td><strong>${esc(r.clubName)}</strong><br><span style="color:var(--dim);font-size:0.72rem">${esc(r.displayName || "")}</span></td>
+        <td class="num"><strong>${r.points || 0}</strong></td>
+        <td class="num">${r.wins || 0}V ${r.draws || 0}E ${r.losses || 0}D</td>
       </tr>`
     )
     .join("");
@@ -240,6 +251,14 @@ function renderOnlineShell(st) {
     ${header(st)}
     <div class="btn-row" style="margin-bottom:0.75rem">
       <button class="btn btn-secondary btn-sm" id="btn-load-online-rank" style="width:auto">Atualizar ranking</button>
+    </div>
+    <div class="panel table-wrap">
+      <h3>Ranking Arena</h3>
+      <p style="color:var(--muted);font-size:0.82rem">Somente partidas ranqueadas entre dirigentes reais. Amistosos contra rivais da liga não pontuam.</p>
+      <table class="data">
+        <thead><tr><th>#</th><th>Clube</th><th>Pontos</th><th>Histórico ranqueado</th></tr></thead>
+        <tbody>${arena || `<tr><td colspan="4" class="empty">Nenhuma partida ranqueada ainda.</td></tr>`}</tbody>
+      </table>
     </div>
     <div class="grid-2">
       <div class="panel table-wrap">

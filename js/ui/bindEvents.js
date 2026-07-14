@@ -368,8 +368,16 @@ export function bindViewEvents(game, app) {
 
   root.querySelectorAll("[data-challenge]").forEach((btn) => {
     btn.onclick = async () => {
+      btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
       const r = await api.challenge(btn.dataset.challenge);
-      if (r.ok) toast("Desafio enviado!", "info");
+      if (r.gameState) game.acceptServerState(r.gameState);
+      if (r.result) {
+        const reward = r.result.reward ? ` · +R$ ${r.result.reward}` : "";
+        toast(`${r.result.homeName} ${r.result.hg} x ${r.result.ag} ${r.result.awayName} · amistoso${reward}`, "info");
+      } else if (r.declined) {
+        toast(r.reason || "O rival recusou o amistoso.", "warn");
+      } else if (r.ok) toast("Desafio enviado!", "info");
       else toast(r.error || "Falha no desafio.", "bad");
       app.setView("online");
     };
@@ -377,18 +385,34 @@ export function bindViewEvents(game, app) {
 
   root.querySelectorAll("[data-respond]").forEach((btn) => {
     btn.onclick = async () => {
+      btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
       const accept = btn.dataset.accept === "1";
       const r = await api.respond(btn.dataset.respond, accept);
+      if (r.gameState) game.acceptServerState(r.gameState);
       if (!r.ok) {
         toast(r.error || "Falha.", "bad");
       } else if (r.declined) {
         toast("Desafio recusado.", "warn");
       } else if (r.result) {
+        const mode = r.result.rated ? " · válida pelo ranking" : " · amistoso";
+        const reward = r.result.reward ? ` · +R$ ${r.result.reward}` : "";
+        const points = r.result.rated ? ` · +${r.result.arenaPointsDelta || 0} pts Arena` : "";
         toast(
-          `PvP: ${r.result.homeName} ${r.result.hg} x ${r.result.ag} ${r.result.awayName}`,
+          `Arena: ${r.result.homeName} ${r.result.hg} x ${r.result.ag} ${r.result.awayName}${mode}${points}${reward}`,
           "info"
         );
       }
+      app.setView("online");
+    };
+  });
+
+  root.querySelectorAll("[data-cancel-challenge]").forEach((btn) => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
+      const r = await api.cancelChallenge(btn.dataset.cancelChallenge);
+      toast(r.ok ? "Convite cancelado." : (r.error || "Não foi possível cancelar."), r.ok ? "info" : "bad");
       app.setView("online");
     };
   });
