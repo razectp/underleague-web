@@ -28,7 +28,7 @@ function setCampaignAccess({ connected = false, hasGame = false } = {}) {
   if (createStatus) {
     createStatus.textContent = connected
       ? "Conta conectada. Escolha a identidade do clube para começar."
-      : "Sessão obrigatória: faça login ou crie sua conta primeiro.";
+      : "Faça login ou crie sua conta primeiro.";
   }
   document.querySelectorAll("[data-lobby-go]").forEach((button) => {
     button.disabled = !hasGame;

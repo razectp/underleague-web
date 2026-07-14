@@ -961,6 +961,13 @@ table.data .pos {
   flex-wrap: wrap;
 }
 .portal-brand { display: flex; gap: 0.85rem; align-items: center; }
+.portal-brand .brand-mark {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+}
 .portal-logo { font-size: clamp(1.5rem, 4vw, 2.2rem); margin: 0; }
 .portal-tag { color: var(--muted); font-size: 0.88rem; margin-top: 0.2rem; max-width: 28rem; }
 .portal-grid {
@@ -991,6 +998,22 @@ table.data .pos {
 }
 .portal-form-grid { gap: 0.65rem; }
 .portal-form-grid label { margin-bottom: 0; }
+.manager-name-field { min-width: 0; }
+.manager-name-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+.manager-name-controls .btn {
+  width: 100%;
+  min-width: 0;
+}
+.manager-name-field .field-help {
+  display: block;
+  margin-top: 0.4rem;
+  line-height: 1.4;
+}
 .demo-box {
   margin-top: 0.85rem;
   padding: 0.65rem 0.75rem;
@@ -1169,6 +1192,11 @@ button.linkish:hover strong {
   border-radius: 8px;
 }
 @media (max-width: 680px) {
+  .portal-brand .brand-mark {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
   .top-actions .btn { width: 44px; min-width: 44px; min-height: 44px; padding: 0.45rem; font-size: 0; }
   .top-actions .btn::before { font-size: 1rem; }
   #btn-lobby::before { content: "⌂"; }
