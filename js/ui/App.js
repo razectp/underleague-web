@@ -120,7 +120,7 @@ export function createApp(game) {
       if (this.view === "rankings") {
         const tab = window.__UL_RANK_UI?.tab || "clubs";
         if (tab === "online" && !window.__UL_ONLINE_RANKINGS) {
-          main.innerHTML = `<div class="empty">Carregando rankings online…</div>`;
+          main.innerHTML = `<div class="empty">Carregando rankings…</div>`;
           try {
             const { api } = await import("../net/api.js");
             const r = await api.rankings();
@@ -129,7 +129,7 @@ export function createApp(game) {
               : { error: r.error || "Falha." };
           } catch {
             window.__UL_ONLINE_RANKINGS = {
-              error: "Servidor indisponível. O jogo precisa da conexão para continuar."
+              error: "Não foi possível atualizar o ranking agora."
             };
           }
           if (this.view !== "rankings") return;

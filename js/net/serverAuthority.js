@@ -23,13 +23,13 @@ export function enableServerAuthority(game) {
    */
   game.serverAction = async function serverAction(action, payload = {}) {
     if (!getToken()) {
-      return { ok: false, msg: "Faça login para jogar com autoridade no servidor." };
+      return { ok: false, msg: "Faça login para continuar." };
     }
     const r = await api.gameAction(action, payload);
     if (!r.ok) {
       return {
         ok: false,
-        msg: r.error || "Falha no servidor.",
+        msg: r.error || "Não foi possível concluir a ação.",
         error: r.error
       };
     }
@@ -72,7 +72,8 @@ export function enableServerAuthority(game) {
     autoFillLineup: () => ({}),
     toggleLineupPlayer: (id) => ({ id }),
     advanceTutorial: () => ({}),
-    skipTutorial: () => ({})
+    skipTutorial: () => ({}),
+    renameManager: (name) => ({ name })
   };
 
   for (const [name, toPayload] of Object.entries(map)) {
@@ -80,7 +81,7 @@ export function enableServerAuthority(game) {
       if (!this.serverAuthoritative || !getToken()) {
         return Promise.resolve({
           ok: false,
-          msg: "Sessão online obrigatória. Entre novamente para continuar."
+          msg: "Sua sessão terminou. Entre novamente para continuar."
         });
       }
       return this.serverAction(name, toPayload(...args));
@@ -89,7 +90,7 @@ export function enableServerAuthority(game) {
 
   game.newGame = function (opts) {
     if (!this.serverAuthoritative || !getToken()) {
-      return Promise.reject(new Error("Sessão online obrigatória para fundar um clube."));
+      return Promise.reject(new Error("Entre na sua conta antes de fundar um clube."));
     }
     return this.serverAction("newGame", opts).then((r) => {
       if (r.ok === false) throw new Error(r.msg || r.error || "Falha ao fundar clube");

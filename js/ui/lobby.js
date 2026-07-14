@@ -45,7 +45,7 @@ export async function refreshLobby(game) {
         </dl>`;
       if (enterRow) enterRow.style.display = "flex";
     } else {
-      statusEl.innerHTML = `<p class="empty">Faça login para carregar seu clube online ou funde um novo.</p>`;
+      statusEl.innerHTML = `<p class="empty">Faça login para continuar ou funde um novo clube.</p>`;
       if (enterRow) enterRow.style.display = "none";
     }
   }
@@ -108,9 +108,9 @@ export async function refreshLobby(game) {
   } catch {
     demoButton?.classList.add("hidden");
     demoBox?.classList.add("hidden");
-    if (clubsEl) clubsEl.innerHTML = `<p class="empty">Servidor indisponível. O jogo requer conexão.</p>`;
+    if (clubsEl) clubsEl.innerHTML = `<p class="empty">O ranking está temporariamente indisponível.</p>`;
     if (scorersEl) scorersEl.innerHTML = `<p class="empty">—</p>`;
-    if (feedEl) feedEl.innerHTML = `<p class="empty">Conexão necessária para carregar o feed.</p>`;
+    if (feedEl) feedEl.innerHTML = `<p class="empty">O feed está temporariamente indisponível.</p>`;
     return null;
   }
 }

@@ -3,12 +3,54 @@
  */
 
 import { VERSION, STYLES, PRACAS, CLUB_TYPES, STANDARD_OPPONENTS, SEASON_THEMES } from "../config/constants.js";
-import { generatePlayer, generateSquad, generateSquadAtOverall, refreshPlayerDerived } from "../data/generators.js";
+import { generatePlayer, generateSquad, generateSquadAtOverall, playerName, refreshPlayerDerived } from "../data/generators.js";
 import { emptyBossSkillXp } from "../systems/skillProgress.js";
 import { rand, uid } from "../core/utils.js";
 
 function emptyRecord() {
   return { wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, points: 0 };
+}
+
+function playerNameKey(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("pt-BR");
+}
+
+function ensureUniquePlayerNames(groups, reservedNames = []) {
+  const used = new Set(reservedNames.map(playerNameKey).filter(Boolean));
+  for (const group of groups) {
+    for (const player of group) {
+      let candidate = player.name;
+      let key = playerNameKey(candidate);
+      for (let attempt = 0; used.has(key) && attempt < 500; attempt++) {
+        candidate = playerName();
+        key = playerNameKey(candidate);
+      }
+      if (used.has(key)) {
+        let suffix = used.size + 1;
+        do {
+          candidate = `${String(player.name || "Jogador").slice(0, 32)} ${suffix++}`;
+          key = playerNameKey(candidate);
+        } while (used.has(key));
+      }
+      player.name = candidate;
+      used.add(key);
+    }
+  }
+}
+
+export function ensureUniquePlayerNamesInState(state) {
+  if (!state || typeof state !== "object") return state;
+  ensureUniquePlayerNames([
+    Array.isArray(state.squad) ? state.squad : [],
+    ...(Array.isArray(state.npcs) ? state.npcs.map((club) => club.squad || []) : []),
+    Array.isArray(state.market) ? state.market : []
+  ], [state.boss?.name]);
+  return state;
 }
 
 /**
@@ -95,6 +137,9 @@ export function createInitialState({ name, clubName: clubLabel, style, clubType 
     if (i === 0) player.marketPrice = Math.min(player.marketPrice, 4500);
     market.push(player);
   }
+
+  // Cada atleta desta campanha tem identidade própria, inclusive nos rivais e mercado.
+  ensureUniquePlayerNamesInState({ boss: { name }, squad, npcs, market });
 
   return {
     version: VERSION,
@@ -276,5 +321,6 @@ export function migrateState(state) {
       if (p.onMarket && fromVersion < 5) p.marketPrice = Math.floor(p.value * 1.05);
     });
   }
+  ensureUniquePlayerNamesInState(state);
   return state;
 }

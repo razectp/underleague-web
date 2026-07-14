@@ -18,6 +18,15 @@ export function playerName() {
   return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}${nick}`;
 }
 
+/** Nome curto para a identidade do dirigente, separado dos atletas do elenco. */
+export function managerName() {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const name = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+    if (name.length <= 20) return name;
+  }
+  return pick(FIRST_NAMES).slice(0, 20);
+}
+
 export function clubName() {
   return `${pick(CLUB_PREFIX)} ${pick(CLUB_SUFFIX)}`;
 }

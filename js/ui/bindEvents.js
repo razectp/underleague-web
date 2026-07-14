@@ -146,7 +146,54 @@ export function bindViewEvents(game, app) {
   if (autoLineup) {
     autoLineup.onclick = async () => {
       await after(game.autoFillLineup());
-      toast("XI montado no servidor.", "info");
+      toast("Escalação montada.", "info");
+    };
+  }
+
+  const managerInput = root.querySelector("#manager-name-edit");
+  const randomManager = root.querySelector("#btn-random-manager");
+  const saveManager = root.querySelector("#btn-save-manager");
+  if (randomManager && managerInput) {
+    randomManager.onclick = async () => {
+      randomManager.disabled = true;
+      try {
+        const result = await api.identitySuggestion();
+        if (!result.ok) {
+          toast(result.error || "Não foi possível gerar um nome agora.", "bad");
+          return;
+        }
+        managerInput.value = result.name;
+        managerInput.focus();
+        toast("Nome gerado. Salve para confirmar.", "info");
+      } finally {
+        randomManager.disabled = false;
+      }
+    };
+  }
+  if (saveManager && managerInput) {
+    const saveName = async () => {
+      const name = managerInput.value.trim();
+      if (name.length < 2) {
+        toast("Digite um nome com pelo menos 2 caracteres.", "warn");
+        managerInput.focus();
+        return;
+      }
+      saveManager.disabled = true;
+      try {
+        const result = await game.renameManager(name);
+        if (result.ok === false) {
+          toast(result.msg || result.error || "Não foi possível atualizar o nome.", "bad");
+          return;
+        }
+        toast("Nome do dirigente atualizado.", "info");
+        app.render();
+      } finally {
+        saveManager.disabled = false;
+      }
+    };
+    saveManager.onclick = saveName;
+    managerInput.onkeydown = (event) => {
+      if (event.key === "Enter") saveName();
     };
   }
 
@@ -287,7 +334,7 @@ export function bindViewEvents(game, app) {
         }
       } catch {
         window.__UL_ONLINE_RANKINGS = {
-          error: "Servidor indisponível. O jogo precisa da conexão para continuar."
+          error: "Não foi possível atualizar o ranking agora."
         };
       }
       window.__UL_RANK_UI = window.__UL_RANK_UI || {};
@@ -308,8 +355,8 @@ export function bindViewEvents(game, app) {
       const r = await api.gameState();
       if (r.ok && r.gameState) {
         game.acceptServerState(r.gameState);
-        toast("Elenco confirmado no servidor (autoridade).", "info");
-      } else toast(r.error || "Sem campanha no servidor.", "bad");
+        toast("Elenco atualizado.", "info");
+      } else toast(r.error || "Seu clube ainda não está pronto.", "bad");
       app.setView("online");
     };
   }

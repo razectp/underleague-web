@@ -52,10 +52,10 @@ export async function request(
       data = await res.json();
     } catch (error) {
       if (error?.name === "AbortError") throw error;
-      data = { ok: false, error: "Resposta inválida do servidor." };
+      data = { ok: false, error: "Não foi possível concluir a solicitação. Tente novamente." };
     }
     if (!data || typeof data !== "object") {
-      data = { ok: false, error: "Resposta inválida do servidor." };
+      data = { ok: false, error: "Não foi possível concluir a solicitação. Tente novamente." };
     }
     if (auth && res.status === 401 && typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("underleague:unauthorized"));
@@ -67,10 +67,8 @@ export async function request(
       ok: false,
       error:
         error?.name === "AbortError"
-          ? "A API demorou demais para responder. Tente novamente."
-          : getRuntimeConfig().localMode
-            ? "Servidor indisponível. Inicie a API para jogar."
-            : `Não foi possível contatar a API (${getApiBase() || "?"} ).`
+          ? "A conexão demorou demais. Tente novamente."
+          : "O jogo está temporariamente indisponível. Tente novamente em instantes."
     };
   } finally {
     clearTimeout(timer);
@@ -84,6 +82,7 @@ export const api = {
   login: (payload) => request("/api/auth/login", { method: "POST", body: payload, auth: false }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
   me: () => request("/api/me"),
+  identitySuggestion: () => request("/api/identity/suggestion"),
 
   gameState: () => request("/api/game/state"),
 

@@ -35,7 +35,7 @@ export async function loadOnlineData() {
     return {
       offline: true,
       needAuth: false,
-      error: "Servidor indisponível. A Arena requer conexão com a API.",
+      error: "A Arena está temporariamente indisponível. Tente novamente em instantes.",
       players: [],
       challenges: [],
       feed: []
@@ -59,7 +59,7 @@ export function viewOnline(game, s, data) {
       <div class="panel">
         <h3>Entre com a conta do seu clube</h3>
         <p style="color:var(--muted);font-size:0.9rem;margin-bottom:0.75rem">
-          Na tela inicial, faça login ou cadastre-se, funde o clube e publique o elenco para desafiar rivais.
+          Na tela inicial, faça login ou cadastre-se, funde o clube e prepare o elenco para desafiar rivais.
         </p>
       </div>`;
   }
@@ -79,7 +79,7 @@ export function viewOnline(game, s, data) {
           <div class="action-card">
             <div>
               <h4>${esc(c.fromName)} quer jogar contra você</h4>
-              <p>Clube vs clube · resultado no servidor</p>
+              <p>Clube vs clube · confronto valendo pelo ranking</p>
             </div>
             <div class="btn-row" style="flex:0;min-width:160px">
               <button class="btn btn-primary btn-sm" data-respond="${c.id}" data-accept="1">Aceitar jogo</button>
@@ -103,7 +103,7 @@ export function viewOnline(game, s, data) {
       const online = p.online
         ? `<span class="badge ok">online</span>`
         : `<span class="badge muted">off</span>`;
-      const save = p.hasSave ? "" : `<span class="badge warn">sem elenco</span>`;
+      const save = p.hasSave ? "" : `<span class="badge warn">clube em formação</span>`;
       return `
         <tr>
           <td>
@@ -126,7 +126,7 @@ export function viewOnline(game, s, data) {
         (f) =>
           `<div class="feed-item"><time>${new Date(f.playedAt || Date.now()).toLocaleString("pt-BR")}</time>${esc(f.text)}</div>`
       )
-      .join("") || `<div class="empty">Nenhum clássico online ainda.</div>`;
+      .join("") || `<div class="empty">Nenhum clássico entre clubes ainda.</div>`;
 
   const myClub = s?.club?.name || "Seu clube";
 
@@ -157,7 +157,7 @@ export function viewOnline(game, s, data) {
     <div class="panel">
       <h3>Rivalidade na arena</h3>
       <p style="color:var(--muted);font-size:0.88rem;line-height:1.55">
-        Publique o elenco, desafie outro clube e aguarde o aceite.
+        Prepare o elenco, desafie outro clube e aguarde o aceite.
         O placar sai na hora — clube contra clube, com o time que cada um montou.
       </p>
     </div>`;

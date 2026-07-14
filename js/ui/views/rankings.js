@@ -64,7 +64,7 @@ function header(st) {
     <div class="tabs">
       ${tabBtn("clubs", "Clubes", st.tab === "clubs")}
       ${tabBtn("players", "Jogadores", st.tab === "players")}
-      ${tabBtn("online", "Online (PvP)", st.tab === "online")}
+      ${tabBtn("online", "Outros clubes", st.tab === "online")}
     </div>`;
 }
 
@@ -195,7 +195,7 @@ function renderOnlineShell(st) {
     return `
       ${header(st)}
       <div class="panel">
-        <div class="empty">Carregando rankings online…</div>
+        <div class="empty">Carregando rankings…</div>
         <button class="btn btn-secondary btn-sm" id="btn-load-online-rank" style="margin-top:0.75rem;width:auto">Carregar</button>
       </div>`;
   }
@@ -239,21 +239,21 @@ function renderOnlineShell(st) {
   return `
     ${header(st)}
     <div class="btn-row" style="margin-bottom:0.75rem">
-      <button class="btn btn-secondary btn-sm" id="btn-load-online-rank" style="width:auto">Atualizar online</button>
+      <button class="btn btn-secondary btn-sm" id="btn-load-online-rank" style="width:auto">Atualizar ranking</button>
     </div>
     <div class="grid-2">
       <div class="panel table-wrap">
-        <h3>Clubes (rede)</h3>
+        <h3>Clubes da comunidade</h3>
         <table class="data">
           <thead><tr><th>#</th><th>Clube</th><th>Rep</th><th>Pts liga</th><th>G/J</th><th>Perf</th><th>OVR</th></tr></thead>
-          <tbody>${clubs || `<tr><td colspan="7" class="empty">Ninguém publicou save ainda.</td></tr>`}</tbody>
+          <tbody>${clubs || `<tr><td colspan="7" class="empty">Nenhum clube no ranking ainda.</td></tr>`}</tbody>
         </table>
       </div>
       <div class="panel table-wrap">
-        <h3>Artilheiros (rede)</h3>
+        <h3>Artilheiros da comunidade</h3>
         <table class="data">
           <thead><tr><th>#</th><th>Jogador</th><th>G</th><th>A</th><th>J</th><th>G/J</th><th>Nota</th></tr></thead>
-          <tbody>${scorers || `<tr><td colspan="7" class="empty">Sem artilheiros sincronizados.</td></tr>`}</tbody>
+          <tbody>${scorers || `<tr><td colspan="7" class="empty">A artilharia ainda não começou.</td></tr>`}</tbody>
         </table>
       </div>
     </div>`;

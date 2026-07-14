@@ -28,7 +28,7 @@
             </div>
           </div>
           <div class="portal-top-meta">
-            <span id="server-dot" class="badge muted" role="status" aria-live="polite">conectando à API…</span>
+            <span id="server-dot" class="badge muted" role="status" aria-live="polite">Verificando disponibilidade…</span>
           </div>
         </header>
 
@@ -38,7 +38,7 @@
             <div class="boot-card portal-card" id="panel-account">
               <h2 id="account-title">Entrar no jogo</h2>
               <p class="portal-hint" id="account-hint">Cadastre-se apenas com e-mail e senha. O clube é criado depois.</p>
-              <p class="connection-note" id="account-api-status" role="status">A conexão com a API é obrigatória para jogar.</p>
+              <p class="connection-note" id="account-api-status" role="status">Entre para continuar sua jornada.</p>
               <div id="account-auth-form">
                 <label>Usuário ou e-mail
                   <input type="text" id="input-email" placeholder="seu@email.com" autocomplete="username" />
@@ -92,9 +92,14 @@
                 <label>Nome do clube / escolinha
                   <input type="text" id="input-club" maxlength="28" placeholder="Ex: Escolinha Estrela do Sul" autocomplete="off" />
                 </label>
-                <label>Você (presidente / técnico)
-                  <input type="text" id="input-name" maxlength="20" placeholder="Ex: Carlos Mendes" autocomplete="off" />
-                </label>
+                <div>
+                  <label for="input-name">Você (presidente / técnico)</label>
+                  <div class="btn-row">
+                    <input type="text" id="input-name" maxlength="20" placeholder="Ex: Carlos Mendes" autocomplete="name" style="flex:1" />
+                    <button class="btn btn-secondary btn-sm" id="btn-random-name" type="button">Gerar nome</button>
+                  </div>
+                  <small class="field-help">Digite seu nome ou gere uma identidade para o dirigente.</small>
+                </div>
                 <label>Tipo de projeto
                   <select id="input-club-type">
                     <option value="escolinha">Escolinha de futebol (base)</option>
@@ -111,8 +116,8 @@
                   </select>
                 </label>
               </div>
-              <button class="btn btn-primary btn-block" id="btn-start" style="margin-top:0.5rem" disabled aria-describedby="create-access-status">Fundar clube e jogar online</button>
-              <p class="online-required" id="create-access-status" role="status">Sessão obrigatória: faça login ou crie sua conta primeiro.</p>
+              <button class="btn btn-primary btn-block" id="btn-start" style="margin-top:0.5rem" disabled aria-describedby="create-access-status">Fundar clube e jogar</button>
+              <p class="online-required" id="create-access-status" role="status">Faça login ou crie sua conta primeiro.</p>
             </div>
 
             <div class="boot-card portal-card" id="panel-shortcuts">
@@ -125,7 +130,7 @@
                 <button type="button" class="portal-link" data-lobby-go="missions" disabled>📌 Tarefas</button>
                 <button type="button" class="portal-link" data-lobby-go="rankings" disabled>📊 Rankings</button>
               </div>
-              <p class="portal-hint" id="shortcuts-access-status" style="margin-top:0.65rem" role="status">Os atalhos ficam disponíveis depois do login e do carregamento do clube pela API.</p>
+              <p class="portal-hint" id="shortcuts-access-status" style="margin-top:0.65rem" role="status">Os atalhos ficam disponíveis assim que seu clube estiver pronto.</p>
             </div>
           </main>
 
@@ -179,7 +184,7 @@
         <div class="top-actions">
           <button class="btn btn-ghost btn-sm" id="btn-lobby" title="Voltar ao portal">⌂ Portal</button>
           <button class="btn btn-ghost btn-sm" id="btn-tick" title="Aguardar três horas">⏳ Aguardar</button>
-          <button class="btn btn-ghost btn-sm" id="btn-sync-state" title="Atualizar clube pela API" aria-label="Atualizar clube pela API">☁</button>
+          <button class="btn btn-ghost btn-sm" id="btn-sync-state" title="Atualizar progresso" aria-label="Atualizar progresso">↻</button>
         </div>
       </header>
 

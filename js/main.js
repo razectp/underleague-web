@@ -9,9 +9,9 @@ import { game } from "./game/Game.js";
 import { createApp } from "./ui/App.js";
 import { $, toast } from "./ui/dom.js";
 import { refreshChrome } from "./ui/chrome.js";
-import { api, setToken, getToken, isServerUp, getApiBase } from "./net/api.js";
+import { api, setToken, getToken, isServerUp } from "./net/api.js";
 import { enableServerAuthority } from "./net/serverAuthority.js";
-import { getRuntimeConfig } from "./config/runtime.js";
+import { managerName } from "./data/generators.js";
 import { refreshLobby, fillDemoCredentials } from "./ui/lobby.js";
 
 const app = createApp(game);
@@ -36,8 +36,8 @@ function setCampaignAccess({ connected = false, hasGame = false } = {}) {
   const shortcutsStatus = $("#shortcuts-access-status");
   if (shortcutsStatus) {
     shortcutsStatus.textContent = hasGame
-      ? "Clube carregado com segurança pela API."
-      : "Os atalhos ficam disponíveis depois do login e do carregamento do clube pela API.";
+      ? "Seu clube está pronto para jogar."
+      : "Os atalhos ficam disponíveis assim que seu clube estiver pronto.";
   }
 }
 
@@ -63,8 +63,8 @@ function setAccountUi(user, { created = false } = {}) {
   const apiStatus = $("#account-api-status");
   if (apiStatus) {
     apiStatus.textContent = connected
-      ? "Sessão validada pela API. Seu progresso fica no servidor."
-      : "A conexão com a API é obrigatória para jogar.";
+      ? "Seu progresso está atualizado."
+      : "Entre para continuar sua jornada.";
   }
   if (!status) return;
   if (!connected) {
@@ -99,7 +99,7 @@ async function syncServerQuiet() {
   if (!getToken() || !game.state) return;
   const result = await loadServerState();
   if (!result.ok && $("#screen-game")?.classList.contains("active")) {
-    toast(result.error || "Conexão com o servidor indisponível.", "bad");
+    toast(result.error || "Não foi possível atualizar seu progresso agora.", "bad");
   }
 }
 
@@ -116,7 +116,7 @@ async function doLogin(user, pass, { autoEnter = true } = {}) {
   if (autoEnter) {
     const loaded = await loadServerState();
     if (!loaded.ok) {
-      toast(loaded.error || "Não foi possível carregar seu clube no servidor.", "bad");
+      toast(loaded.error || "Não foi possível carregar seu clube agora.", "bad");
       await refreshLobby(game);
       return true;
     }
@@ -182,6 +182,15 @@ function bindGlobal() {
     });
   }
 
+  $("#btn-random-name")?.addEventListener("click", async () => {
+    const input = $("#input-name");
+    if (!input) return;
+    const suggestion = getToken() ? await api.identitySuggestion() : null;
+    input.value = suggestion?.ok ? suggestion.name : managerName();
+    input.focus();
+    toast("Nome gerado. Você ainda pode editá-lo.", "info");
+  });
+
   $("#btn-start")?.addEventListener("click", async () => {
     if (!getToken()) {
       toast("Crie uma conta ou faça login antes de fundar o clube.", "warn");
@@ -236,7 +245,7 @@ function bindGlobal() {
       toast(loaded.error || "Nenhum clube encontrado na sua conta.", "bad");
       return;
     }
-    toast("Clube atualizado a partir da API.", "info");
+    toast("Progresso atualizado.", "info");
     app.render();
   });
 
@@ -368,19 +377,15 @@ function bindGlobal() {
 
 async function checkServer() {
   const dot = $("#server-dot");
-  const cfg = getRuntimeConfig();
   const up = await isServerUp();
   if (dot) {
     if (up) {
-      const where = cfg.localMode ? "local" : "API remota";
-      dot.textContent = `servidor online · ${where}`;
-      dot.title = cfg.apiBase || window.location.origin;
+      dot.textContent = "Jogo disponível";
+      dot.removeAttribute("title");
       dot.className = "badge ok";
     } else {
-      dot.textContent = cfg.localMode
-        ? "servidor indisponível — jogo pausado"
-        : "API indisponível — jogo pausado";
-      dot.title = getApiBase() || "";
+      dot.textContent = "Jogo temporariamente indisponível";
+      dot.removeAttribute("title");
       dot.className = "badge warn";
     }
   }
