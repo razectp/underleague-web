@@ -74,3 +74,64 @@ export function modal({ title, body, confirmText, onConfirm, danger }) {
   };
   dialog.focus();
 }
+
+export function textPromptModal({ title, label, value = "", help = "", maxLength = 20, onConfirm }) {
+  const root = $("#modal-root");
+  modalReturnFocus = document.activeElement;
+  const titleId = `modal-title-${Date.now()}`;
+  const inputId = `modal-input-${Date.now()}`;
+  const app = document.getElementById("app");
+  if (app) app.inert = true;
+  root.classList.remove("hidden");
+  root.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
+      <h3 id="${titleId}">${title}</h3>
+      <label for="${inputId}"></label>
+      <input id="${inputId}" class="input" type="text" maxlength="${maxLength}" autocomplete="off">
+      ${help ? `<p class="micro-help">${help}</p>` : ""}
+      <div class="btn-row">
+        <button class="btn btn-ghost" data-x>Cancelar</button>
+        <button class="btn btn-primary" data-ok>Salvar</button>
+      </div>
+    </div>`;
+  const input = root.querySelector("input");
+  root.querySelector(`label[for="${inputId}"]`).textContent = label;
+  const cancel = root.querySelector("[data-x]");
+  const confirm = root.querySelector("[data-ok]");
+  input.value = value;
+  const submit = () => {
+    const nextValue = input.value.trim();
+    closeModal(root);
+    onConfirm?.(nextValue);
+  };
+  cancel.onclick = () => closeModal(root);
+  confirm.onclick = submit;
+  root.onclick = (event) => {
+    if (event.target === root) closeModal(root);
+  };
+  root.onkeydown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeModal(root);
+      return;
+    }
+    if (event.key === "Enter" && document.activeElement === input) {
+      event.preventDefault();
+      submit();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = [input, cancel, confirm];
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+  input.focus();
+  input.select();
+}

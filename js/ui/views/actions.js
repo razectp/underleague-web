@@ -4,6 +4,7 @@ import { TRAININGS, OPERATIONS } from "../../config/constants.js";
 import { riskLabel } from "../../core/utils.js";
 import { skillBar, ensureBossSkillXp } from "../../systems/skillProgress.js";
 import { statBar } from "../format.js";
+import { playerNameHtml } from "../text.js";
 
 function skillProgressHtml(statKey, level, skillXp) {
   const xp = (skillXp && skillXp[statKey]) || 0;
@@ -42,7 +43,7 @@ export function viewTrain(game, s) {
     .sort((a, b) => b.overall - a.overall)
     .map(
       (p) =>
-        `<option value="${p.id}">${p.name} (${p.pos} ${p.overall}) · sta ${Math.floor(p.stamina)}</option>`
+        `<option value="${p.id}">${playerNameHtml(p)} (${p.pos} ${p.overall}) · sta ${Math.floor(p.stamina)}</option>`
     )
     .join("");
 

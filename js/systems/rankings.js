@@ -1,3 +1,5 @@
+import { playerDisplayName } from "../data/generators.js";
+
 /**
  * Rankings de clubes e jogadores (liga local + snapshots).
  * Métricas: pontos, desempenho, gols/partida, assistências, nota, etc.
@@ -162,7 +164,7 @@ export function playerRankings(game, { scope = "league", sortBy = "goals", minGa
 
       list.push({
         id: p.id,
-        name: p.name,
+        name: playerDisplayName(p),
         pos: p.pos,
         age: p.age,
         overall: p.overall,
@@ -226,7 +228,7 @@ export function buildRankingSnapshot(game) {
         ? Math.round(game.state.squad.reduce((a, p) => a + p.overall, 0) / game.state.squad.length)
         : 0,
     topScorers: top.map((p) => ({
-      name: p.name,
+      name: playerDisplayName(p),
       pos: p.pos,
       goals: p.goals,
       assists: p.assists,

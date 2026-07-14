@@ -3,6 +3,7 @@
 import { PRACAS } from "../../config/constants.js";
 import { formatMoney } from "../../core/utils.js";
 import { academyUpgradeCost } from "../../systems/academy.js";
+import { playerNameHtml } from "../text.js";
 
 export function viewClub(game, s) {
   const c = s.club;
@@ -97,7 +98,7 @@ export function viewMap(game) {
       .join("");
     return `
       <div class="influence-card ${leader?.you ? "leading" : ""}" data-praca="${p.id}">
-        <h4>${p.name}</h4>
+        <h4>${playerNameHtml(p)}</h4>
         <p>${p.desc}</p>
         <div class="influence-score"><strong>${mine.score}%</strong><span>sua influência · ${mine.rank}º</span></div>
         <div class="influence-ranking">${top || `<span class="influence-club">Nenhum clube ativo</span>`}</div>
@@ -141,7 +142,7 @@ export function viewLeague(game, s) {
       (p) =>
         `<tr style="${p.you ? "background:rgba(62,207,106,0.08)" : ""}">
           <td class="num">${p.rank}</td>
-          <td><strong>${p.name}</strong> <span class="pos">${p.pos}</span><br>
+          <td><strong>${playerNameHtml(p)}</strong> <span class="pos">${p.pos}</span><br>
             <span style="color:var(--dim);font-size:0.72rem">${p.clubName}</span></td>
           <td class="num"><strong>${p.goals}</strong></td>
           <td class="num">${p.gpg.toFixed(2)}</td>
@@ -182,7 +183,7 @@ export function viewHospital(_game, s) {
       (p) => `
     <div class="action-card">
       <div>
-        <h4>${p.name} <span class="pos">${p.pos}</span></h4>
+        <h4>${playerNameHtml(p)} <span class="pos">${p.pos}</span></h4>
         <p>${p.injury.name} · ${p.injury.daysLeft} dia(s) restante(s)</p>
       </div>
       <button class="btn btn-primary btn-sm" data-heal="${p.id}">Tratar R$500</button>

@@ -8,6 +8,8 @@ import {
   MATCH_ENERGY_COST
 } from "../../config/constants.js";
 import { formatMoney } from "../../core/utils.js";
+import { playerDisplayName } from "../../data/generators.js";
+import { escapeHtml as esc } from "../text.js";
 import { MENTALITY_UI, plainTacticalTip, GLOSSARY } from "../guidance.js";
 import {
   playerAvailability,
@@ -35,7 +37,7 @@ export function viewSquad(game, s) {
         <td><span class="pos">${p.pos}</span></td>
         <td>
           <button class="linkish" data-player="${p.id}" title="Ver ficha">
-            <strong>${p.name}</strong>
+            <strong>${esc(playerDisplayName(p))}</strong>
           </button>
           <br><span style="color:var(--dim);font-size:0.75rem">${p.age}a · J${p.games || 0} G${p.goals || 0} A${p.assists || 0}${p.ratingCount ? ` · nota ${((p.ratingSum || 0) / p.ratingCount).toFixed(1)}` : ""}${y ? ` · 🟨${y}` : ""}</span>
         </td>
@@ -45,7 +47,10 @@ export function viewSquad(game, s) {
         <td class="num">${p.morale}</td>
         <td>${statusBadge}</td>
         <td class="num">R$ ${formatMoney(p.value)}</td>
-        <td><button class="btn btn-ghost btn-sm" data-sell="${p.id}">Vender</button></td>
+        <td><div class="btn-row">
+          <button class="btn btn-ghost btn-sm" data-nickname="${p.id}">Apelido</button>
+          <button class="btn btn-ghost btn-sm" data-sell="${p.id}">Vender</button>
+        </div></td>
       </tr>`;
     })
     .join("");
@@ -84,7 +89,8 @@ export function viewTactics(game, s) {
           .map((p) => {
             const star = p.overall >= 75 ? "star" : "";
             const inj = p.injury ? "injured" : "";
-            return `<div class="pitch-player ${star} ${inj}"><strong>${p.name.split(" ")[0]}</strong><span>${p.pos} · ${p.overall}</span></div>`;
+            const shortName = p.nickname || p.name.split(" ")[0];
+            return `<div class="pitch-player ${star} ${inj}"><strong>${esc(shortName)}</strong><span>${p.pos} · ${p.overall}</span></div>`;
           })
           .join("")}</div>`
     )
@@ -230,7 +236,7 @@ export function viewMarket(_game, s) {
       const total = p.marketPrice + Math.floor(p.marketPrice * MARKET_FEE_RATE);
       return `<tr>
         <td><span class="pos">${p.pos}</span></td>
-        <td><strong>${p.name}</strong><br><span style="color:var(--dim);font-size:0.75rem">${p.age}a · pot ${p.potential}</span></td>
+        <td><strong>${esc(playerDisplayName(p))}</strong><br><span style="color:var(--dim);font-size:0.75rem">${p.age}a · pot ${p.potential}</span></td>
         <td class="num">${p.overall}</td>
         <td class="num">${p.pace}/${p.shoot}/${p.pass}/${p.defend}/${p.physical}</td>
         <td class="num">R$ ${formatMoney(p.marketPrice)}</td>

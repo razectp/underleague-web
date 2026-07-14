@@ -1,5 +1,5 @@
 import { MATCH_ENERGY_COST, SEASON_THEMES } from "../config/constants.js";
-import { refreshPlayerDerived } from "../data/generators.js";
+import { playerDisplayName, refreshPlayerDerived } from "../data/generators.js";
 import { rand, clamp, formatMoney } from "../core/utils.js";
 import { injurePlayer } from "./injuries.js";
 import { bestXI, tacticalMatchup, teamStrength } from "./tactics.js";
@@ -594,7 +594,7 @@ export function playNextMatch(game) {
     injuries: injuryMarks,
     xi: (playerIsHome ? homeXI : awayXI).map((p) => ({
       id: p.id,
-      name: p.name,
+      name: playerDisplayName(p),
       pos: p.pos,
       overall: p.overall
     }))

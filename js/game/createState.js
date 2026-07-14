@@ -12,7 +12,7 @@ function emptyRecord() {
   return { wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, points: 0 };
 }
 
-function playerNameKey(value) {
+export function playerNameKey(value) {
   return String(value || "")
     .normalize("NFKD")
     .replace(/\p{M}/gu, "")
@@ -21,22 +21,35 @@ function playerNameKey(value) {
     .toLocaleLowerCase("pt-BR");
 }
 
+export function statePlayers(state) {
+  if (!state || typeof state !== "object") return [];
+  return [
+    ...(Array.isArray(state.squad) ? state.squad : []),
+    ...(Array.isArray(state.npcs) ? state.npcs.flatMap((club) => club.squad || []) : []),
+    ...(Array.isArray(state.market) ? state.market : [])
+  ];
+}
+
+function stripLegacyGeneratedNickname(player) {
+  if (!player || typeof player.name !== "string") return;
+  const match = player.name.trim().match(/^(.*?)\s+["“]([^"”]+)["”]\s*$/u);
+  if (match) player.name = match[1].trim();
+  if (player.nickname === undefined) player.nickname = null;
+}
+
 function ensureUniquePlayerNames(groups, reservedNames = []) {
   const used = new Set(reservedNames.map(playerNameKey).filter(Boolean));
   for (const group of groups) {
     for (const player of group) {
+      stripLegacyGeneratedNickname(player);
       let candidate = player.name;
       let key = playerNameKey(candidate);
-      for (let attempt = 0; used.has(key) && attempt < 500; attempt++) {
+      for (let attempt = 0; (!key || used.has(key)) && attempt < 10_000; attempt++) {
         candidate = playerName();
         key = playerNameKey(candidate);
       }
-      if (used.has(key)) {
-        let suffix = used.size + 1;
-        do {
-          candidate = `${String(player.name || "Jogador").slice(0, 32)} ${suffix++}`;
-          key = playerNameKey(candidate);
-        } while (used.has(key));
+      if (!key || used.has(key)) {
+        throw new Error("Não foi possível gerar uma identidade exclusiva para o atleta.");
       }
       player.name = candidate;
       used.add(key);
@@ -44,13 +57,17 @@ function ensureUniquePlayerNames(groups, reservedNames = []) {
   }
 }
 
-export function ensureUniquePlayerNamesInState(state) {
+export function ensureUniquePlayerNamesInState(state, reservedNames = []) {
   if (!state || typeof state !== "object") return state;
   ensureUniquePlayerNames([
     Array.isArray(state.squad) ? state.squad : [],
     ...(Array.isArray(state.npcs) ? state.npcs.map((club) => club.squad || []) : []),
     Array.isArray(state.market) ? state.market : []
-  ], [state.boss?.name]);
+  ], [
+    state.boss?.name,
+    ...statePlayers(state).map((player) => player.nickname),
+    ...reservedNames
+  ]);
   return state;
 }
 
@@ -300,6 +317,7 @@ export function migrateState(state) {
   }
   if (Array.isArray(state.squad)) {
     state.squad.forEach((p) => {
+      stripLegacyGeneratedNickname(p);
       if (!p.attrXp) {
         p.attrXp = { pace: 0, shoot: 0, pass: 0, defend: 0, physical: 0 };
       }
@@ -322,6 +340,7 @@ export function migrateState(state) {
   }
   if (Array.isArray(state.npcs)) {
     state.npcs.flatMap((c) => c.squad || []).forEach((p) => {
+      stripLegacyGeneratedNickname(p);
       refreshPlayerDerived(p);
       if (fromVersion < 3 || !Number.isFinite(p.salary)) {
         p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
@@ -330,6 +349,7 @@ export function migrateState(state) {
   }
   if (Array.isArray(state.market)) {
     state.market.forEach((p) => {
+      stripLegacyGeneratedNickname(p);
       refreshPlayerDerived(p);
       if (fromVersion < 3 || !Number.isFinite(p.salary)) {
         p.salary = Math.max(35, Math.floor((p.value || 0) / 55));

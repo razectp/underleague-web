@@ -17,6 +17,7 @@
  */
 
 import { rand, pick, chance, clamp } from "../core/utils.js";
+import { playerDisplayName } from "../data/generators.js";
 
 function push(events, ev) {
   events.push({
@@ -46,7 +47,7 @@ function createSide(name, xi, baseStr, key) {
     key,
     name,
     baseStr,
-    players: xi.map((p) => ({ ...p })),
+    players: xi.map((p) => ({ ...p, name: playerDisplayName(p) })),
     yellows: new Map(),
     sentOff: new Set(),
     onPitch: new Set(xi.map((p) => p.id)),
@@ -287,8 +288,8 @@ export function simulateMatchNarrative({
 
   const home = createSide(homeName, homeXI, homeStr, "home");
   const away = createSide(awayName, awayXI, awayStr, "away");
-  home.bench = (homeBench || []).map((p) => ({ ...p }));
-  away.bench = (awayBench || []).map((p) => ({ ...p }));
+  home.bench = (homeBench || []).map((p) => ({ ...p, name: playerDisplayName(p) }));
+  away.bench = (awayBench || []).map((p) => ({ ...p, name: playerDisplayName(p) }));
   const sides = { home, away };
 
   let hg = 0;

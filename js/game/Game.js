@@ -364,6 +364,14 @@ export class Game {
     );
   }
 
+  setPlayerNickname(playerId, nickname) {
+    const player = this.state?.squad.find((entry) => entry.id === playerId);
+    if (!player) return { ok: false, msg: "Atleta do seu clube não encontrado." };
+    player.nickname = String(nickname || "").trim() || null;
+    this.commit();
+    return { ok: true };
+  }
+
   autoFillLineup() {
     return autoFillLineup(this);
   }

@@ -11,6 +11,7 @@ import { FACILITY_DEFS, ensureFacilities, facilityUpgradeCost } from "../../syst
 import { seasonGoalsSummary } from "../../systems/seasonGoals.js";
 import { APPROACHES } from "../../config/constants.js";
 import { MATCH_ENERGY_COST } from "../../config/constants.js";
+import { playerNameHtml } from "../text.js";
 
 export function viewLineup(game, s) {
   const sum = lineupSummary(game);
@@ -28,7 +29,7 @@ export function viewLineup(game, s) {
       const disabled = !av.ok ? "disabled" : "";
       return `<tr class="${!av.ok ? "dim-row" : ""}">
         <td><span class="pos">${p.pos}</span></td>
-        <td><strong>${p.name}</strong><br><small style="color:var(--dim)">${av.label}${p.contractYears != null ? ` · contrato ${p.contractYears}a` : ""}</small></td>
+        <td><strong>${playerNameHtml(p)}</strong><br><small style="color:var(--dim)">${av.label}${p.contractYears != null ? ` · contrato ${p.contractYears}a` : ""}</small></td>
         <td class="num">${p.overall}</td>
         <td class="num">${Math.floor(p.stamina)}</td>
         <td><span class="badge ${role === "XI" ? "ok" : role === "Banco" ? "warn" : "muted"}">${role}</span></td>
@@ -87,7 +88,7 @@ export function viewPrematch(game, s) {
     <div class="grid-2">
       <div class="panel">
         <h3>Seu XI (${sum.starters.length})</h3>
-        ${sum.starters.map((p) => `<div class="feed-item"><time>${p.pos}</time>${p.name} · ${p.overall}</div>`).join("")}
+        ${sum.starters.map((p) => `<div class="feed-item"><time>${p.pos}</time>${playerNameHtml(p)} · ${p.overall}</div>`).join("")}
         <div class="btn-row" style="margin-top:0.75rem">
           <button type="button" class="btn btn-secondary btn-sm" data-go="lineup">Ajustar escalação</button>
           <button type="button" class="btn btn-secondary btn-sm" data-go="tactics">Tática</button>
@@ -101,8 +102,8 @@ export function viewPrematch(game, s) {
           <dt>Suspensos</dt><dd>${report.suspended.length}</dd>
           <dt>Exaustos</dt><dd>${report.exhausted.length}</dd>
         </dl>
-        ${report.suspended.map((x) => `<div class="msg warn">${x.player.name}: ${x.detail}</div>`).join("")}
-        ${report.injured.slice(0, 4).map((x) => `<div class="msg bad">${x.player.name}: ${x.detail}</div>`).join("")}
+        ${report.suspended.map((x) => `<div class="msg warn">${playerNameHtml(x.player)}: ${x.detail}</div>`).join("")}
+        ${report.injured.slice(0, 4).map((x) => `<div class="msg bad">${playerNameHtml(x.player)}: ${x.detail}</div>`).join("")}
       </div>
     </div>
     <div class="panel">
@@ -142,7 +143,7 @@ export function viewPostMatch(game, s) {
     <div class="panel">
       <h3>XI utilizado</h3>
       <div class="btn-row" style="flex-wrap:wrap">
-        ${(pm.xi || []).map((p) => `<span class="badge muted">${p.pos} ${p.name}</span>`).join(" ")}
+        ${(pm.xi || []).map((p) => `<span class="badge muted">${p.pos} ${playerNameHtml(p)}</span>`).join(" ")}
       </div>
       <div class="btn-row" style="margin-top:0.75rem">
         <button type="button" class="btn btn-secondary btn-sm" data-go="compete" data-compete-tab="liga">Voltar à liga</button>

@@ -7,15 +7,25 @@ import { POSITIONS } from "../config/constants.js";
 import {
   FIRST_NAMES,
   LAST_NAMES,
-  NICKS,
   CLUB_PREFIX,
   CLUB_SUFFIX
 } from "../config/names.js";
 import { rand, pick, chance, clamp, uid } from "../core/utils.js";
 
 export function playerName() {
-  const nick = chance(18) ? ` "${pick(NICKS)}"` : "";
-  return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}${nick}`;
+  const first = pick(FIRST_NAMES);
+  const firstLast = pick(LAST_NAMES);
+  if (!chance(34)) return `${first} ${firstLast}`;
+  let secondLast = pick(LAST_NAMES);
+  while (secondLast === firstLast) secondLast = pick(LAST_NAMES);
+  return `${first} ${firstLast} ${secondLast}`;
+}
+
+/** Nome exibido; o apelido nunca faz parte da identidade civil do atleta. */
+export function playerDisplayName(player) {
+  if (!player) return "Jogador";
+  const name = String(player.name || "Jogador");
+  return player.nickname ? `${name} “${player.nickname}”` : name;
 }
 
 /** Nome curto para a identidade do dirigente, separado dos atletas do elenco. */
@@ -89,6 +99,7 @@ export function generatePlayer(opts = {}) {
   const p = {
     id: uid(),
     name: opts.name || playerName(),
+    nickname: null,
     pos,
     age,
     pace: roll(skew.pace),

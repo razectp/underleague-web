@@ -8,7 +8,13 @@ export const FIRST_NAMES = [
   "Paulo", "Renato", "Sérgio", "Túlio", "Ueslei", "Victor", "Wellington", "Zé",
   "Alex", "Beto", "Cristiano", "Dudu", "Everton", "Fabinho", "Gilberto", "Hulk",
   "Isco", "Jádson", "Kléber", "Luan", "Marcos", "Nenê", "Oscar", "Pato",
-  "Ronaldo", "Sávio", "Taison", "Vagner", "Willian", "Xandão", "Yago", "Zeca"
+  "Ronaldo", "Sávio", "Taison", "Vagner", "Willian", "Xandão", "Yago", "Zeca",
+  "Adriel", "Alan", "Alisson", "Antônio", "Arthur", "Augusto", "Breno", "Cássio",
+  "Cauã", "César", "Davi", "Denílson", "Douglas", "Elias", "Enzo", "Éverton",
+  "Fabrício", "Flávio", "Francisco", "Geovane", "Heitor", "Ítalo", "Jeferson",
+  "Jonathan", "José", "Juliano", "Kevin", "Leonardo", "Luiz", "Maicon", "Marcelo",
+  "Márcio", "Miguel", "Nathan", "Pablo", "Patrick", "Raí", "Raul", "Renan",
+  "Rian", "Robson", "Rodrigo", "Ruan", "Sandro", "Vitor", "Wallace", "Wesley"
 ];
 
 export const LAST_NAMES = [
@@ -18,12 +24,14 @@ export const LAST_NAMES = [
   "Teixeira", "Moreira", "Cardoso", "Correia", "Nunes", "Pinto", "Monteiro",
   "Azevedo", "Batista", "Borges", "Cunha", "Duarte", "Freitas", "Guimarães",
   "Moraes", "Peixoto", "Queiroz", "Ramos", "Siqueira", "Tavares", "Vieira",
-  "Xavier", "Andrade", "Barros", "Cavalcanti", "Fonseca", "Melo"
-];
-
-export const NICKS = [
-  "o Fera", "Fenômeno", "Machine", "Relâmpago", "Tanque", "Mago", "Sniper",
-  "Capitão", "Xerife", "Bruxo", "Furacão", "Canhão", "Gato", "Panzer", "Craque"
+  "Xavier", "Andrade", "Barros", "Cavalcanti", "Fonseca", "Melo", "Abreu",
+  "Aguiar", "Amaral", "Amorim", "Assis", "Bastos", "Bezerra", "Brandão", "Bueno",
+  "Cabral", "Camargo", "Cândido", "Coelho", "Cordeiro", "Cruz", "Dantas", "Esteves",
+  "Farias", "Figueiredo", "Franco", "Galvão", "Garcia", "Gonçalves", "Leal", "Lemos",
+  "Lopes", "Macedo", "Machado", "Marques", "Matos", "Medeiros", "Mesquita", "Miranda",
+  "Moura", "Muniz", "Navarro", "Neves", "Novaes", "Paiva", "Pires", "Porto",
+  "Prado", "Reis", "Rezende", "Sá", "Sales", "Santana", "Saraiva", "Seixas",
+  "Serra", "Soares", "Vasconcelos", "Viana", "Vidal"
 ];
 
 export const CLUB_PREFIX = [

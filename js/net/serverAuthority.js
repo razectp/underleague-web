@@ -72,7 +72,8 @@ export function enableServerAuthority(game) {
     toggleLineupPlayer: (id) => ({ id }),
     advanceTutorial: () => ({}),
     skipTutorial: () => ({}),
-    renameManager: (name) => ({ name })
+    renameManager: (name) => ({ name }),
+    setPlayerNickname: (playerId, nickname) => ({ playerId, nickname })
   };
 
   for (const [name, toPayload] of Object.entries(map)) {

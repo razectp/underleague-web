@@ -8,8 +8,14 @@ export const chance = (p) => Math.random() * 100 < p;
 
 export const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-export const uid = () =>
-  Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+export const uid = () => {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  // Compatibilidade com navegadores antigos. O servidor e navegadores atuais
+  // sempre usam UUID v4 nativo.
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
+};
 
 export const formatMoney = (n) => Math.floor(n).toLocaleString("pt-BR");
 

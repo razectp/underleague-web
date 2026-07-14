@@ -3,8 +3,10 @@
  * Usa data-* attributes no HTML gerado pelas views.
  */
 
-import { $, toast, modal } from "./dom.js";
+import { $, toast, modal, textPromptModal } from "./dom.js";
 import { api, getToken } from "../net/api.js";
+import { playerDisplayName } from "../data/generators.js";
+import { escapeHtml as esc } from "./text.js";
 import { setCompeteTab } from "./guidance.js";
 import { openLiveMatch } from "./liveMatch.js";
 
@@ -94,10 +96,28 @@ export function bindViewEvents(game, app) {
       if (!p) return;
       modal({
         title: "Vender jogador",
-        body: `Confirmar venda de <strong>${p.name}</strong>? Taxa de 3% sobre o valor. Elenco mínimo: 14.`,
+        body: `Confirmar venda de <strong>${esc(playerDisplayName(p))}</strong>? Taxa de 3% sobre o valor. Elenco mínimo: 14.`,
         confirmText: "Vender",
         danger: true,
         onConfirm: () => after(game.sellPlayer(p.id))
+      });
+    };
+  });
+
+  root.querySelectorAll("[data-nickname]").forEach((btn) => {
+    btn.onclick = () => {
+      const player = game.state.squad.find((entry) => entry.id === btn.dataset.nickname);
+      if (!player) return;
+      textPromptModal({
+        title: "Apelido do atleta",
+        label: player.name,
+        value: player.nickname || "",
+        maxLength: 20,
+        help: "Opcional. Deixe vazio para remover; o nome oficial não será alterado.",
+        onConfirm: async (nickname) => {
+          const result = await after(game.setPlayerNickname(player.id, nickname));
+          if (result?.ok) toast(nickname ? "Apelido atualizado." : "Apelido removido.", "info");
+        }
       });
     };
   });
@@ -261,7 +281,7 @@ export function bindViewEvents(game, app) {
         ? `${p.injury.name} (${p.injury.daysLeft}d)`
         : "Apto";
       modal({
-        title: `${p.name}`,
+        title: esc(playerDisplayName(p)),
         body: `
           <span class="pos">${p.pos}</span> · OVR <strong>${p.overall}</strong> · ${p.age} anos · pot ${p.potential}<br><br>
           Ritmo ${p.pace} · Finalização ${p.shoot} · Passe ${p.pass}<br>
