@@ -3,7 +3,7 @@
  * Altere números de balanceamento e catálogos aqui.
  */
 
-export const VERSION = 8;
+export const VERSION = 9;
 
 /** O mundo avança 24 horas de jogo a cada 5 horas reais do servidor. */
 export const REAL_MS_PER_GAME_DAY = 5 * 60 * 60 * 1000;
@@ -111,6 +111,7 @@ export const FORMATIONS = {
  * Rivais permanentes do modo PvE. A identidade e a ordem nunca mudam;
  * cada volta é calibrada contra a força atual do jogador.
  */
+/** Ordem = dificuldade crescente (circuito e OVR alvo). */
 export const STANDARD_OPPONENTS = [
   {
     id: "campinho",
@@ -125,6 +126,18 @@ export const STANDARD_OPPONENTS = [
     reward: 500
   },
   {
+    id: "estrela_norte",
+    name: "Estrela do Norte",
+    targetOverall: 44,
+    formation: "4-4-2",
+    mentality: "equilibrado",
+    approach: "direto",
+    label: "Base",
+    desc: "Time regional organizado, sem estrelas caras.",
+    lesson: "Consistência vence a pressa.",
+    reward: 600
+  },
+  {
     id: "uniao_bairro",
     name: "União do Bairro",
     targetOverall: 48,
@@ -135,6 +148,18 @@ export const STANDARD_OPPONENTS = [
     desc: "Duas linhas organizadas e muita bola longa.",
     lesson: "Forma e stamina fazem diferença.",
     reward: 700
+  },
+  {
+    id: "riacho_fc",
+    name: "Riacho FC",
+    targetOverall: 52,
+    formation: "4-3-3",
+    mentality: "ataque",
+    approach: "contra_ataque",
+    label: "Ágil",
+    desc: "Transições rápidas e laterais ofensivos.",
+    lesson: "Feche as costas e controle o ritmo.",
+    reward: 850
   },
   {
     id: "muralha_vila",
@@ -149,6 +174,18 @@ export const STANDARD_OPPONENTS = [
     reward: 950
   },
   {
+    id: "forja_industrial",
+    name: "Forja Industrial",
+    targetOverall: 58,
+    formation: "4-2-3-1",
+    mentality: "defesa",
+    approach: "direto",
+    label: "Físico",
+    desc: "Jogo bruto, segundo amarelo e bola parada.",
+    lesson: "Disciplina e set pieces importam.",
+    reward: 1100
+  },
+  {
     id: "ferroviario",
     name: "Ferroviário Atlético",
     targetOverall: 60,
@@ -159,6 +196,18 @@ export const STANDARD_OPPONENTS = [
     desc: "Time físico que pressiona até o último minuto.",
     lesson: "Rode o elenco e explore a pressão adversária.",
     reward: 1250
+  },
+  {
+    id: "colina_verde",
+    name: "Colina Verde",
+    targetOverall: 62,
+    formation: "3-5-2",
+    mentality: "equilibrado",
+    approach: "posse",
+    label: "Técnico",
+    desc: "Meio-campistas criativos e paciência na bola.",
+    lesson: "Pressione o primeiro passe.",
+    reward: 1400
   },
   {
     id: "academia_central",
@@ -173,6 +222,18 @@ export const STANDARD_OPPONENTS = [
     reward: 1600
   },
   {
+    id: "maritimo_sul",
+    name: "Marítimo do Sul",
+    targetOverall: 67,
+    formation: "4-3-3",
+    mentality: "ataque",
+    approach: "pressao",
+    label: "Alta",
+    desc: "Linha alta e laterais que sobem junto.",
+    lesson: "Explore o espaço nas costas da zaga.",
+    reward: 1750
+  },
+  {
     id: "litoral_veloz",
     name: "Litoral Veloz",
     targetOverall: 70,
@@ -185,6 +246,30 @@ export const STANDARD_OPPONENTS = [
     reward: 2100
   },
   {
+    id: "catedral_sc",
+    name: "Catedral SC",
+    targetOverall: 72,
+    formation: "4-2-3-1",
+    mentality: "equilibrado",
+    approach: "posse",
+    label: "Tradicional",
+    desc: "Elenco equilibrado e rotina profissional.",
+    lesson: "Não deixe o jogo esfriar no meio-campo.",
+    reward: 2200
+  },
+  {
+    id: "atlas_metropole",
+    name: "Atlas Metrópole",
+    targetOverall: 74,
+    formation: "4-3-3",
+    mentality: "ataque",
+    approach: "direto",
+    label: "Metropolitano",
+    desc: "Atletas caros, pressão por resultado e pouca paciência.",
+    lesson: "Segure a bola e force erros de pressa.",
+    reward: 2600
+  },
+  {
     id: "porto_imperial",
     name: "Porto Imperial",
     targetOverall: 76,
@@ -195,6 +280,18 @@ export const STANDARD_OPPONENTS = [
     desc: "Elenco caro, banco forte e nenhuma fraqueza óbvia.",
     lesson: "Prove que seu projeto está pronto para a próxima volta.",
     reward: 3000
+  },
+  {
+    id: "orion_capital",
+    name: "Órion Capital",
+    targetOverall: 78,
+    formation: "3-5-2",
+    mentality: "equilibrado",
+    approach: "pressao",
+    label: "Topo",
+    desc: "Banco de elite e intensidade em todo o campo.",
+    lesson: "Rode o elenco e sofra a pressão sem quebrar.",
+    reward: 3200
   }
 ];
 

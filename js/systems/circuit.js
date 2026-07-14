@@ -33,19 +33,20 @@ export function circuitStatus(game) {
   const myXI = bestXI(game.state.squad, game.state.club.formation);
   const currentPower = teamStrength(myXI, game.state.club, game.state.boss.stats);
   if (!circuit.tourBasePower) circuit.tourBasePower = Math.round(currentPower);
-  // Escada fácil no começo da volta; o “chefe” ainda pressiona
-  const offsets = [-28, -18, -11, -4, 3, 10, 17];
+  // Escada fácil no começo da volta; o último da lista ainda pressiona.
   const prestigeStep = Math.min(10, (circuit.tour - 1) * 1.25);
   const rivals = [...game.state.npcs]
     .filter((c) => c.circuitId)
     .sort((a, b) => a.difficulty - b.difficulty)
-    .map((rival) => {
+    .map((rival, index, list) => {
       const def = rivalDefinition(rival);
       const xi = bestXI(rival.squad, rival.formation);
       const basePower = teamStrength(xi, rival, null);
+      const t = list.length <= 1 ? 1 : index / (list.length - 1);
+      const offset = -28 + t * 48;
       const desiredPower = Math.max(
         35,
-        circuit.tourBasePower + (offsets[rival.difficulty - 1] || 0) + prestigeStep
+        circuit.tourBasePower + offset + prestigeStep
       );
       const powerScale = desiredPower / Math.max(1, basePower);
       const rec = circuit.records[recordKey(circuit.tour, rival.circuitId)] || {

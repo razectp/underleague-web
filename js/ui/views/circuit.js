@@ -62,7 +62,7 @@ export function viewCircuit(game, s) {
     <p class="view-sub">Volta ${circuit.tour} · ${currentStars}/${rivals.length * 3} estrelas nesta volta</p>
     <div class="hero-line">
       Força do seu XI: <strong>${myPower}</strong> · ⚡${CIRCUIT_ENERGY_COST} por jogo · próximo desafio em ${game.cooldownLeft("circuit") || 0}h<br>
-      Vença o Porto Imperial para fechar a volta e enfrentar rivais mais fortes na seguinte.
+      Vença o último rival da escada para fechar a volta e enfrentar adversários mais fortes na seguinte.
     </div>
     <div class="panel"><h3>Escada de adversários <span class="tag">${circuit.totalWins} vitórias totais</span></h3><div class="circuit-list">${cards}</div></div>
     <div class="panel"><h3>Último teste</h3>${lastHtml}</div>`;

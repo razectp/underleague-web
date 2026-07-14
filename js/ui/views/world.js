@@ -154,7 +154,7 @@ export function viewLeague(game, s) {
 
   return `
     <h1 class="view-title">Liga local</h1>
-    <p class="view-sub">Temporada ${s.season} · ${s.seasonTheme?.name || "Temporada Clássica"} · todos jogam 14 partidas</p>
+    <p class="view-sub">Temporada ${s.season} · ${s.seasonTheme?.name || "Temporada Clássica"} · ${(s.npcs || []).length + 1} clubes · turno e returno</p>
     <div class="panel table-wrap">
       <h3>Classificação</h3>
       <table class="data">
@@ -222,8 +222,46 @@ export function viewLog(_game, s) {
     )
     .join("");
 
+  const npcEvents = (s.npcAi?.events || [])
+    .slice(0, 12)
+    .map(
+      (e) =>
+        `<div class="feed-item"><time>D${e.day}</time>${e.text}</div>`
+    )
+    .join("");
+  const rivalCards = (s.npcs || [])
+    .map((club) => {
+      const plan = club.ai?.plan;
+      const last = club.ai?.recentDecisions?.[0];
+      return `
+        <div class="action-card">
+          <div>
+            <h4>${club.name}</h4>
+            <p style="color:var(--muted);font-size:0.84rem;line-height:1.4">
+              ${club.ai?.personality || "comissão"} · DNA ${club.ai?.dna?.formation || club.formation} / ${club.ai?.dna?.approach || club.approach}
+              ${plan ? `<br>Plano: ${plan.formation}, ${plan.mentality}, ${plan.approach}` : ""}
+              ${last ? `<br>Última: D${last.day} — ${last.text}` : ""}
+            </p>
+          </div>
+          <span class="tag">${club.ai?.dayFocus || "—"}</span>
+        </div>`;
+    })
+    .join("");
+
   return `
     <h1 class="view-title">Crônicas do clube</h1>
-    <p class="view-sub">Histórico de ${s.club.name}.</p>
-    <div class="panel log-list">${items || `<div class="empty">Nada registrado.</div>`}</div>`;
+    <p class="view-sub">Histórico de ${s.club.name} e comissões rivais (gestão no servidor).</p>
+    <div class="panel">
+      <h3>Comissões da liga <span class="tag">${(s.npcs || []).length} bots</span></h3>
+      <div class="badge ok" style="margin-bottom:0.5rem">Sempre ativas no relógio do servidor · 1 ciclo/dia · treino ou mercado (não os dois)</div>
+      <div class="action-list">${rivalCards || `<div class="empty">Sem rivais.</div>`}</div>
+    </div>
+    <div class="panel">
+      <h3>Decisões recentes dos rivais</h3>
+      <div class="feed-list">${npcEvents || `<div class="empty">Ainda sem movimentos das comissões.</div>`}</div>
+    </div>
+    <div class="panel log-list">
+      <h3>Seu clube</h3>
+      ${items || `<div class="empty">Nada registrado.</div>`}
+    </div>`;
 }

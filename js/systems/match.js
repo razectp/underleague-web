@@ -11,7 +11,7 @@ import { pushLedger } from "./finance.js";
 import { homeGateBonus } from "./facilities.js";
 import { evolveNpcs } from "./npcEvolve.js";
 import { ensureSeasonGoals } from "./seasonGoals.js";
-import { recordNpcIncome } from "./npcAi.js";
+import { recordNpcIncome, selectNpcXI } from "./npcAi.js";
 
 /** Temporada completa em turno e returno: todos os clubes jogam em cada rodada. */
 export function generateFixtures(game) {
@@ -131,8 +131,12 @@ function simulateNpcFixture(game, fixture) {
   const satOutAway = new Set(
     (away.squad || []).filter((p) => p.suspension?.matchesLeft > 0).map((p) => p.id)
   );
-  const homeXI = bestXI(game.getSquad(home.id), home.formation);
-  const awayXI = bestXI(game.getSquad(away.id), away.formation);
+  const homeXI = home.npc
+    ? selectNpcXI(home, home.formation)
+    : bestXI(game.getSquad(home.id), home.formation);
+  const awayXI = away.npc
+    ? selectNpcXI(away, away.formation)
+    : bestXI(game.getSquad(away.id), away.formation);
   if (homeXI.length < 11 || awayXI.length < 11) {
     const hg = homeXI.length >= 11 ? 3 : 0;
     const ag = awayXI.length >= 11 ? 3 : 0;
@@ -160,10 +164,11 @@ function simulateNpcFixture(game, fixture) {
   const ap = teamStrength(awayXI, away, null) * awayFit;
   const benchFor = (club, xi) => {
     const used = new Set(xi.map((player) => player.id));
-    return bestXI(
-      (club.squad || []).filter((player) => !used.has(player.id)),
-      club.formation
-    ).slice(0, 7);
+    const pool = (club.squad || []).filter((player) => !used.has(player.id));
+    if (club.npc) {
+      return selectNpcXI({ ...club, squad: pool }, club.formation).slice(0, 7);
+    }
+    return bestXI(pool, club.formation).slice(0, 7);
   };
   const sim = simulateMatchNarrative({
     homeName: home.name,
@@ -348,17 +353,15 @@ export function playNextMatch(game) {
   const awayIsPlayer = fixture.away === game.state.club.id;
   const homeXI = homeIsPlayer
     ? getStartingXI(game)
-    : bestXI(game.getSquad(fixture.home), homeClub.formation);
+    : selectNpcXI(homeClub, homeClub.formation);
   const awayXI = awayIsPlayer
     ? getStartingXI(game)
-    : bestXI(game.getSquad(fixture.away), awayClub.formation);
+    : selectNpcXI(awayClub, awayClub.formation);
   const playerBench = homeIsPlayer || awayIsPlayer ? getBenchPlayers(game) : [];
   const npcBenchFor = (club, xi) => {
     const used = new Set(xi.map((player) => player.id));
-    return bestXI(
-      (club.squad || []).filter((player) => !used.has(player.id)),
-      club.formation
-    ).slice(0, 7);
+    const pool = (club.squad || []).filter((player) => !used.has(player.id));
+    return selectNpcXI({ ...club, squad: pool }, club.formation).slice(0, 7);
   };
   const opponentClub = homeIsPlayer ? awayClub : homeClub;
 

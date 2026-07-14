@@ -74,13 +74,25 @@ export function suggestNextAction(game) {
     const f = next.fixture;
     const oppId = f.home === s.club.id ? f.away : f.home;
     const opp = game.getClub(oppId);
+    const planHint = opp?.ai?.plan
+      ? ` · rival em ${opp.ai.plan.formation}/${opp.ai.plan.mentality}`
+      : "";
     return {
       id: "match",
       title: "Jogar a rodada da liga",
-      why: `vs ${opp?.name || "adversário"} · ⚡${MATCH_ENERGY_COST} · 1x por dia.`,
+      why: `vs ${opp?.name || "adversário"} · ⚡${MATCH_ENERGY_COST} · 1 partida por dia do clube${planHint}.`,
       view: "compete",
       tab: "liga",
       primary: true
+    };
+  }
+  if (s.boss.lastMatchDay === s.day && next) {
+    return {
+      id: "wait-day",
+      title: "Aguarde o próximo dia",
+      why: "Você já jogou a liga hoje. O relógio do servidor libera a próxima rodada (e as comissões rivais rodam na virada do dia).",
+      view: "home",
+      primary: false
     };
   }
 

@@ -299,21 +299,79 @@ export function migrateState(state) {
   state.circuit.records = state.circuit.records || {};
   state.circuit.history = state.circuit.history || [];
 
-  // Saves antigos recebem os rivais permanentes, preservando elencos e IDs.
-  if (Array.isArray(state.npcs)) {
-    const ordered = [...state.npcs].sort((a, b) => {
-      const avg = (c) => (c.squad || []).reduce((n, p) => n + (p.overall || 0), 0) / Math.max(1, c.squad?.length || 0);
-      return avg(a) - avg(b);
+  // Garante todos os rivais do catálogo (saves antigos recebem clubes novos).
+  {
+    if (!Array.isArray(state.npcs)) state.npcs = [];
+    const byCircuit = new Map(
+      state.npcs.filter((n) => n.circuitId).map((n) => [n.circuitId, n])
+    );
+    let expanded = false;
+    STANDARD_OPPONENTS.forEach((def, i) => {
+      let npc = byCircuit.get(def.id);
+      if (!npc) {
+        const id = uid();
+        const rivalSquad = generateSquadAtOverall(id, def.targetOverall, def.approach, 16);
+        rivalSquad.forEach((p) => {
+          p.form = Math.min(92, 50 + i * 2);
+          p.morale = Math.min(92, 52 + i * 2);
+        });
+        npc = {
+          id,
+          circuitId: def.id,
+          difficulty: i + 1,
+          name: def.name,
+          bank: 5000 + i * 2200,
+          prestige: 10 + i * 4,
+          members: [],
+          formation: def.formation,
+          mentality: def.mentality,
+          approach: def.approach,
+          description: def.desc,
+          lesson: def.lesson,
+          influence: {},
+          ...emptyRecord(),
+          npc: true,
+          squad: rivalSquad
+        };
+        state.npcs.push(npc);
+        byCircuit.set(def.id, npc);
+        expanded = true;
+      } else {
+        npc.circuitId = def.id;
+        npc.difficulty = i + 1;
+        npc.name = def.name;
+        npc.formation = npc.formation || def.formation;
+        npc.mentality = npc.mentality || def.mentality;
+        npc.approach = npc.approach || def.approach;
+        npc.description = npc.description || def.desc;
+        npc.lesson = npc.lesson || def.lesson;
+        npc.npc = true;
+      }
     });
-    ordered.forEach((npc, i) => {
-      const def = STANDARD_OPPONENTS[i % STANDARD_OPPONENTS.length];
-      npc.circuitId = npc.circuitId || def.id;
-      npc.difficulty = npc.difficulty || i + 1;
-      npc.name = def.name;
-      npc.approach = npc.approach || def.approach;
-      npc.description = npc.description || def.desc;
-      npc.lesson = npc.lesson || def.lesson;
-    });
+    // Ordem estável do catálogo; clubes órfãos (sem circuitId) ficam no fim.
+    const catalog = STANDARD_OPPONENTS.map((d) => byCircuit.get(d.id)).filter(Boolean);
+    const orphans = state.npcs.filter((n) => !n.circuitId || !byCircuit.has(n.circuitId));
+    // Dedupe: keep catalog order only for known ids
+    const seen = new Set();
+    state.npcs = [];
+    for (const n of catalog) {
+      if (seen.has(n.id)) continue;
+      seen.add(n.id);
+      state.npcs.push(n);
+    }
+    for (const n of orphans) {
+      if (seen.has(n.id)) continue;
+      seen.add(n.id);
+      state.npcs.push(n);
+    }
+    if (expanded || fromVersion < 9) {
+      // Liga redimensionada: calendário e tabela da temporada atual recomeçam.
+      state.seasonFixtures = [];
+      state.nextFixtureIndex = 0;
+      const resetSeason = (club) => Object.assign(club, emptyRecord());
+      if (state.club) resetSeason(state.club);
+      state.npcs.forEach(resetSeason);
+    }
   }
   if (Array.isArray(state.squad)) {
     state.squad.forEach((p) => {

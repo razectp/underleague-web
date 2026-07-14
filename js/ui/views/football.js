@@ -15,6 +15,7 @@ import {
   playerAvailability,
   squadAvailabilityReport
 } from "../../systems/availability.js";
+import { selectNpcXI } from "../../systems/npcAi.js";
 
 export function viewSquad(game, s) {
   const report = squadAvailabilityReport(s.squad);
@@ -157,7 +158,7 @@ export function viewMatch(game, s) {
     const opp = game.getClub(oppId);
     const where = f.home === s.club.id ? "em casa" : "fora";
     const myXI = game.bestXI(s.squad, s.club.formation);
-    const oppXI = game.bestXI(opp.squad, opp.formation);
+    const oppXI = opp?.npc ? selectNpcXI(opp, opp.formation) : game.bestXI(opp.squad, opp.formation);
     const myPower = Math.round(game.teamStrength(myXI, s.club, s.boss.stats));
     const oppPower = Math.round(game.teamStrength(oppXI, opp, null));
     const fit = game.tacticalMatchup(s.club, opp);
@@ -167,11 +168,12 @@ export function viewMatch(game, s) {
         <div class="score">vs</div>
         <div class="team"><div>${opp.name}</div><small style="color:var(--muted);font-family:var(--mono)">${where}</small></div>
       </div>
-      <p style="text-align:center;color:var(--muted);margin-bottom:0.8rem">Custa ⚡${MATCH_ENERGY_COST} · 1 partida por dia · prêmio no caixa do clube</p>
-      <p class="tactical-note">Força ${myPower} × ${oppPower} · rival: ${opp.formation}, ${opp.mentality}, ${APPROACHES[opp.approach]?.label || "estilo desconhecido"}. ${fit.reasons.join("; ")}.</p>
+      <p style="text-align:center;color:var(--muted);margin-bottom:0.8rem">Custa ⚡${MATCH_ENERGY_COST} · <strong>1 partida de liga por dia do clube</strong> (relógio do servidor) · prêmio no caixa</p>
+      <p class="tactical-note">Força ${myPower} × ${oppPower} · comissão rival: ${opp.formation}, ${opp.mentality}, ${APPROACHES[opp.approach]?.label || "estilo desconhecido"}${opp.ai?.plan ? ` · plano D${opp.ai.plan.day}` : ""}. ${fit.reasons.join("; ")}.</p>
+      ${opp.ai?.plan ? `<p class="tactical-note" style="opacity:0.9">Leitura da comissão: deve manter ${opp.ai.plan.formation} / ${APPROACHES[opp.ai.plan.approach]?.label || opp.ai.plan.approach} com mentalidade ${opp.ai.plan.mentality}.</p>` : ""}
       <div class="btn-row is-center">
         <button type="button" class="btn btn-primary" id="btn-play-match" ${s.boss.lastMatchDay === s.day ? "disabled" : ""}>
-          ${s.boss.lastMatchDay === s.day ? "Aguarde o próximo dia" : "Jogar partida"}
+          ${s.boss.lastMatchDay === s.day ? "Aguarde o próximo dia do clube" : "Jogar partida"}
         </button>
       </div>`;
   }
