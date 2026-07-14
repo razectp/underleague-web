@@ -1,0 +1,10 @@
+/**
+ * Under League — CSS entry point
+ *
+ * tokens.css     → variáveis (cor, espaço, shell)
+ * foundation.css → layout shell + botões + padrões anti-bug
+ * app.css        → componentes e views
+ */
+@import url("./tokens.css");
+@import url("./foundation.css");
+@import url("./app.css");

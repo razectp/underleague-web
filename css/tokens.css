@@ -1,0 +1,88 @@
+/**
+ * Design tokens — Under League
+ * Única fonte de verdade para cor, espaço, tipo e shell de layout.
+ */
+
+:root {
+  /* —— Color —— */
+  --bg: #0b0f0c;
+  --bg-2: #121a14;
+  --bg-3: #1a261c;
+  --panel: #152018;
+  --panel-2: #1c2b20;
+  --border: #2a3d2e;
+  --border-hot: #3d6b45;
+  --text: #d8e6d9;
+  --muted: #8aa08c;
+  --dim: #78917c;
+  --green: #3ecf6a;
+  --green-dim: #1f7a3c;
+  --gold: #e2b84a;
+  --gold-dim: #8a6a1f;
+  --red: #e05555;
+  --red-dim: #7a2424;
+  --blue: #5b9fd4;
+  --orange: #e08945;
+  --purple: #9b7bde;
+
+  /* —— Elevation —— */
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+  /* —— Scrollbars (tema do site) —— */
+  --scroll-size: 10px;
+  --scroll-track: #0e1510;
+  --scroll-thumb: #2a3d2e;
+  --scroll-thumb-hover: #3d6b45;
+  --scroll-thumb-active: #3ecf6a;
+
+  /* —— Radius —— */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* —— Typography —— */
+  --font: "Source Sans 3", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --display: "Orbitron", var(--font);
+  --text-xs: 0.78rem;
+  --text-sm: 0.85rem;
+  --text-md: 0.95rem;
+  --text-lg: 1.1rem;
+  --leading: 1.45;
+
+  /* —— Spacing scale (4px base) —— */
+  --space-1: 0.25rem;  /* 4 */
+  --space-2: 0.5rem;   /* 8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.25rem;  /* 20 */
+  --space-6: 1.5rem;   /* 24 */
+  --space-8: 2rem;     /* 32 */
+
+  /* —— App shell (evita “vão morto” no centro) —— */
+  --topbar-h: 56px;
+  --sidebar-w: 210px;
+  --rail-w: 270px;
+  --content-pad-x: 1.35rem;
+  --content-pad-y: 1.1rem;
+
+  /* —— Controls —— */
+  --btn-pad-y: 0.65rem;
+  --btn-pad-x: 1rem;
+  --btn-pad-y-sm: 0.4rem;
+  --btn-pad-x-sm: 0.7rem;
+  --btn-min-w: 7.5rem;
+  --control-h: 2.5rem;
+
+  /* —— Breakpoints (documentação; @media usa valores literais) —— */
+  --bp-md: 980px;
+  --bp-lg: 1100px;
+
+  /* —— Z-index ladder —— */
+  --z-base: 1;
+  --z-sticky: 20;
+  --z-modal: 90;
+  --z-toast: 100;
+}

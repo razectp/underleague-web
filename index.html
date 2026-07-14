@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Under League — Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Orbitron:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!--
+    API: config.js define window.__UL_CONFIG__.apiBase
+    Local: ""  |  Produção: "https://api.seudominio.com"
+  -->
+  <script src="config.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- PORTAL / HOME -->
+    <section id="screen-boot" class="screen active">
+      <div class="portal">
+        <header class="portal-top">
+          <div class="portal-brand">
+            <span class="brand-mark">UL</span>
+            <div>
+              <h1 class="logo portal-logo">UNDER<span>LEAGUE</span></h1>
+              <p class="portal-tag">Funde seu clube · treine o elenco · dispute a liga e a arena</p>
+            </div>
+          </div>
+          <div class="portal-top-meta">
+            <span id="server-dot" class="badge muted" role="status" aria-live="polite">conectando à API…</span>
+          </div>
+        </header>
+
+        <div class="portal-grid">
+          <!-- LOGIN / STATUS -->
+          <aside class="portal-col">
+            <div class="boot-card portal-card" id="panel-account">
+              <h2 id="account-title">Entrar no jogo</h2>
+              <p class="portal-hint" id="account-hint">Cadastre-se apenas com e-mail e senha. O clube é criado depois.</p>
+              <p class="connection-note" id="account-api-status" role="status">A conexão com a API é obrigatória para jogar.</p>
+              <div id="account-auth-form">
+                <label>Usuário ou e-mail
+                  <input type="text" id="input-email" placeholder="seu@email.com" autocomplete="username" />
+                </label>
+                <label>Senha
+                  <input type="password" id="input-password" placeholder="mínimo 6 caracteres" autocomplete="current-password" />
+                </label>
+                <div class="btn-row">
+                  <button class="btn btn-primary" id="btn-login" type="button">Login</button>
+                  <button class="btn btn-gold" id="btn-demo" type="button">Conta demo</button>
+                </div>
+                <button class="btn btn-secondary btn-block" id="btn-register" type="button" style="margin-top:0.5rem">Criar conta</button>
+                <div class="demo-box" id="demo-box">
+                  <strong>Demo pronta</strong>
+                  <code>teste</code> / <code>senha123</code>
+                  <span>Já vem com elenco, stats e ranking.</span>
+                </div>
+              </div>
+              <div id="account-session" class="hidden">
+                <p id="account-status" class="portal-status" role="status"></p>
+                <button class="btn btn-ghost btn-block" id="btn-logout" type="button">Sair / trocar conta</button>
+              </div>
+            </div>
+
+            <div class="boot-card portal-card" id="panel-status">
+              <h2>Status</h2>
+              <div id="lobby-status" class="portal-status-body">
+                <p class="empty">Faça login para ver energia, prestígio e posição.</p>
+              </div>
+              <div class="btn-row" id="lobby-enter-row" style="display:none;margin-top:0.75rem">
+                <button class="btn btn-primary btn-block" id="btn-enter-game" type="button">Entrar no clube →</button>
+              </div>
+            </div>
+          </aside>
+
+          <!-- CENTRO: notícias + fundar -->
+          <main class="portal-col portal-col-main">
+            <div class="boot-card portal-card">
+              <h2>Notícias da liga</h2>
+              <div id="lobby-news" class="lobby-news">
+                <div class="msg info">Bem-vindo à Under League. Funde sua escolinha ou clube e construa um projeto de verdade.</div>
+                <div class="msg">Treinos e rotina formam o técnico e o elenco ao longo dos dias — não se resolve num finzinho de semana.</div>
+                <div class="msg">Na Arena, cada conta é um clube. Desafie outros times e teste o elenco de verdade.</div>
+              </div>
+            </div>
+
+            <div class="boot-card portal-card" id="panel-create">
+              <h2>Depois do cadastro: fundar clube</h2>
+              <p class="portal-hint">Entre ou crie uma conta para liberar a fundação do clube. Todo o progresso fica vinculado à sua sessão.</p>
+              <div class="grid-2 portal-form-grid">
+                <label>Nome do clube / escolinha
+                  <input type="text" id="input-club" maxlength="28" placeholder="Ex: Escolinha Estrela do Sul" autocomplete="off" />
+                </label>
+                <label>Você (presidente / técnico)
+                  <input type="text" id="input-name" maxlength="20" placeholder="Ex: Carlos Mendes" autocomplete="off" />
+                </label>
+                <label>Tipo de projeto
+                  <select id="input-club-type">
+                    <option value="escolinha">Escolinha de futebol (base)</option>
+                    <option value="bairro" selected>Time de bairro / amador</option>
+                    <option value="clube">Clube em construção</option>
+                  </select>
+                </label>
+                <label>Filosofia de jogo
+                  <select id="input-style">
+                    <option value="equilibrio">Equilibrado</option>
+                    <option value="ataque">Ofensivo / Pressing</option>
+                    <option value="defesa">Catenaccio / Seguro</option>
+                    <option value="negocio">Mercador (foco em transferências)</option>
+                  </select>
+                </label>
+              </div>
+              <button class="btn btn-primary btn-block" id="btn-start" style="margin-top:0.5rem" disabled aria-describedby="create-access-status">Fundar clube e jogar online</button>
+              <p class="online-required" id="create-access-status" role="status">Sessão obrigatória: faça login ou crie sua conta primeiro.</p>
+            </div>
+
+            <div class="boot-card portal-card" id="panel-shortcuts">
+              <h2>Atalhos</h2>
+              <div class="portal-links">
+                <button type="button" class="portal-link" data-lobby-go="home" disabled>🏠 Meu time</button>
+                <button type="button" class="portal-link" data-lobby-go="compete" disabled>⚽ Competir</button>
+                <button type="button" class="portal-link" data-lobby-go="train" disabled>🏋️ Treinos</button>
+                <button type="button" class="portal-link" data-lobby-go="squad" disabled>👕 Elenco</button>
+                <button type="button" class="portal-link" data-lobby-go="missions" disabled>📌 Tarefas</button>
+                <button type="button" class="portal-link" data-lobby-go="rankings" disabled>📊 Rankings</button>
+              </div>
+              <p class="portal-hint" id="shortcuts-access-status" style="margin-top:0.65rem" role="status">Os atalhos ficam disponíveis depois do login e do carregamento do clube pela API.</p>
+            </div>
+          </main>
+
+          <!-- RANKINGS -->
+          <aside class="portal-col">
+            <div class="boot-card portal-card">
+              <h2>Ranking de clubes</h2>
+              <div id="lobby-clubs" class="lobby-table-wrap">
+                <p class="empty">Carregando…</p>
+              </div>
+            </div>
+            <div class="boot-card portal-card">
+              <h2>Artilharia</h2>
+              <div id="lobby-scorers" class="lobby-table-wrap">
+                <p class="empty">Carregando…</p>
+              </div>
+            </div>
+            <div class="boot-card portal-card">
+              <h2>Feed PvP</h2>
+              <div id="lobby-feed" class="lobby-feed">
+                <p class="empty">Sem confrontos ainda.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="boot-foot portal-foot">
+          Under League · demo: <strong>teste / senha123</strong>
+        </footer>
+      </div>
+    </section>
+
+    <!-- JOGO PRINCIPAL -->
+    <section id="screen-game" class="screen">
+      <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">UL</span>
+          <div>
+            <strong id="top-name">—</strong>
+            <small id="top-club">—</small>
+          </div>
+        </div>
+          <div class="stat-pills" aria-label="Resumo do clube; deslize para ver todos os indicadores">
+          <div class="pill" title="Seu bolso: dinheiro pessoal do dirigente"><span class="pill-k">R$</span><span id="top-money">0</span></div>
+          <div class="pill" title="Energia: gasta em treinos e jogos"><span class="pill-k">⚡</span><span id="top-energy">100</span><span class="pill-max">/100</span></div>
+          <div class="pill" title="Prestígio do projeto"><span class="pill-k">★</span><span id="top-rep">0</span></div>
+          <div class="pill" title="Dia da temporada"><span class="pill-k">📅</span><span id="top-day">D1</span></div>
+          <div class="pill" title="Disposição / saúde do dirigente"><span class="pill-k">♥</span><span id="top-health">100%</span></div>
+        </div>
+        <div class="top-actions">
+          <button class="btn btn-ghost btn-sm" id="btn-lobby" title="Voltar ao portal">⌂ Portal</button>
+          <button class="btn btn-ghost btn-sm" id="btn-tick" title="Aguardar três horas">⏳ Aguardar</button>
+          <button class="btn btn-ghost btn-sm" id="btn-sync-state" title="Atualizar clube pela API" aria-label="Atualizar clube pela API">☁</button>
+        </div>
+      </header>
+
+      <div class="layout">
+        <button class="mobile-nav-toggle" id="btn-mobile-nav" type="button" aria-controls="sidebar" aria-expanded="false">
+          <span>Menu do jogo</span><span aria-hidden="true">☰</span>
+        </button>
+        <nav class="sidebar" id="sidebar" aria-label="Navegação do jogo">
+          <div class="nav-group">
+            <div class="nav-group-label">Hoje</div>
+            <button class="nav-item active" data-view="home">🏠 Meu time</button>
+            <button class="nav-item" data-view="missions">📌 Tarefas</button>
+            <button class="nav-item" data-view="rest">🛏️ Descanso</button>
+          </div>
+          <div class="nav-group">
+            <div class="nav-group-label">Time</div>
+            <button class="nav-item" data-view="squad">👕 Elenco</button>
+            <button class="nav-item" data-view="lineup">📋 Escalação</button>
+            <button class="nav-item" data-view="train">🏋️ Treinos</button>
+            <button class="nav-item" data-view="tactics">📐 Tática</button>
+            <button class="nav-item" data-view="club">🏴 Clube</button>
+            <button class="nav-item" data-view="finance">💰 Finanças</button>
+          </div>
+          <div class="nav-group">
+            <div class="nav-group-label">Jogar</div>
+            <button class="nav-item" data-view="prematch">🎯 Pré-jogo</button>
+            <button class="nav-item" data-view="compete">⚽ Competir</button>
+            <button class="nav-item" data-view="calendar">📅 Calendário</button>
+            <button class="nav-item" data-view="postmatch">📝 Pós-jogo</button>
+          </div>
+          <div class="nav-group nav-group-more" id="nav-more">
+            <button type="button" class="nav-more-toggle" id="btn-nav-more" aria-expanded="false" aria-controls="nav-more-items">
+              Mais sistemas <span class="nav-more-chevron">▾</span>
+            </button>
+            <div class="nav-more-items" id="nav-more-items" hidden>
+              <button class="nav-item" data-view="market">💱 Mercado</button>
+              <button class="nav-item" data-view="ops">🎯 Operações</button>
+              <button class="nav-item" data-view="map">🗺️ Influência</button>
+              <button class="nav-item" data-view="hospital">🏥 Médico</button>
+              <button class="nav-item" data-view="rankings">📊 Rankings</button>
+              <button class="nav-item" data-view="status">👤 Técnico</button>
+              <button class="nav-item" data-view="log">📜 Crônicas</button>
+            </div>
+          </div>
+        </nav>
+
+        <main class="content" id="main-content" tabindex="-1"></main>
+
+        <aside class="rail">
+          <div class="rail-card">
+            <h3>Situação</h3>
+            <div id="rail-status" class="rail-body"></div>
+          </div>
+          <div class="rail-card">
+            <h3>Feed ao vivo</h3>
+            <div id="rail-feed" class="rail-body feed"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast-root" aria-live="polite" aria-atomic="false"></div>
+  <div id="modal-root" class="hidden"></div>
+  <div id="live-match-root" class="live-match-root hidden" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
