@@ -1,7 +1,7 @@
 /** Avanço de tempo, dia novo, efeitos passivos */
 
-import { generatePlayer } from "../data/generators.js";
-import { PRACAS } from "../config/constants.js";
+import { generatePlayer, refreshPlayerDerived } from "../data/generators.js";
+import { PRACAS, REAL_MS_PER_GAME_HOUR } from "../config/constants.js";
 import { rand, pick, chance, clamp, formatMoney } from "../core/utils.js";
 import { healDayTick } from "./injuries.js";
 import { ensureDailyMissions } from "./missions.js";
@@ -71,6 +71,7 @@ function formDrift(game) {
     if (p.injury) p.form = clamp(p.form - 2, 15, 99);
     else p.form = clamp(p.form + rand(-2, 2), 20, 99);
     p.morale = clamp(p.morale + rand(-1, 2), 15, 100);
+    refreshPlayerDerived(p);
   });
 }
 
@@ -162,11 +163,33 @@ export function advanceHours(game, h, silent = false) {
     s.boss.energy = clamp(s.boss.energy + Math.floor(h * 1.6), 0, s.boss.maxEnergy);
   }
   s.squad.forEach((p) => {
-    if (!p.injury) p.stamina = clamp(p.stamina + h * 3.2, 0, 100);
+    if (!p.injury) p.stamina = clamp(p.stamina + h * 3.2, 0, p.maxStamina || 100);
   });
   tickCooldowns(game, h);
   if (!silent) {
     game.emit();
     game.saveSilent();
   }
+}
+
+/**
+ * Concilia o estado com o relógio autoritativo. O cliente nunca informa `now`.
+ * Frações menores que uma hora do jogo permanecem acumuladas no marcador.
+ */
+export function syncServerTime(game, now = Date.now()) {
+  const s = game?.state;
+  if (!s) return 0;
+
+  let anchor = Number(s.serverClockAt);
+  if (!Number.isFinite(anchor) || anchor > now) {
+    s.serverClockAt = now;
+    return 0;
+  }
+
+  const elapsedGameHours = Math.floor((now - anchor) / REAL_MS_PER_GAME_HOUR);
+  if (elapsedGameHours <= 0) return 0;
+
+  s.serverClockAt = anchor + elapsedGameHours * REAL_MS_PER_GAME_HOUR;
+  advanceHours(game, elapsedGameHours, true);
+  return elapsedGameHours;
 }

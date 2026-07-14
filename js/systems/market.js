@@ -1,7 +1,6 @@
 import { MARKET_FEE_RATE, SQUAD_MIN, SQUAD_MAX } from "../config/constants.js";
 import { calcValue } from "../data/generators.js";
 import { chance, clamp, pick, formatMoney } from "../core/utils.js";
-import { advanceHours } from "./time.js";
 import { pushLedger } from "./finance.js";
 
 export function buyPlayer(game, playerId) {
@@ -41,7 +40,6 @@ export function buyPlayer(game, playerId) {
 
   game.state.boss.rep += 1;
   game.addXp(6);
-  advanceHours(game, 1, true);
   game.notify(`Contratou ${p.name} por R$ ${formatMoney(price)} (+taxa R$ ${formatMoney(fee)}).`, "info");
   game.feed(`${game.state.club.name} anuncia ${p.name}.`);
   game.commit();
@@ -82,7 +80,6 @@ export function sellPlayer(game, playerId) {
   }
 
   game.addXp(4);
-  advanceHours(game, 1, true);
   game.notify(`Vendeu ${p.name} · líquido R$ ${formatMoney(net)} (taxa 3%).`, "info");
   game.commit();
   return { ok: true };

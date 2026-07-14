@@ -104,7 +104,7 @@ export function viewRest(game, s) {
     </div>
     <div class="panel">
       <h3>Na rotina</h3>
-      <p style="color:var(--muted);font-size:0.9rem">O botão Aguardar no topo também passa o tempo e recupera um pouco de energia e fôlego do elenco.</p>
+      <p style="color:var(--muted);font-size:0.9rem">O relógio continua no servidor mesmo quando você sai. Cada dia do clube dura 5 horas reais; 1h do clube equivale a 12min30s reais.</p>
     </div>`;
 }
 

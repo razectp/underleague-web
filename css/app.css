@@ -1200,7 +1200,6 @@ button.linkish:hover strong {
   .top-actions .btn { width: 44px; min-width: 44px; min-height: 44px; padding: 0.45rem; font-size: 0; }
   .top-actions .btn::before { font-size: 1rem; }
   #btn-lobby::before { content: "⌂"; }
-  #btn-tick::before { content: "⏳"; }
   #btn-sync-state::before { content: "☁"; }
   .circuit-card { grid-template-columns: 2rem 1fr; }
   .circuit-action { grid-column: 2; text-align: left; }

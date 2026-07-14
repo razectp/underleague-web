@@ -3,7 +3,6 @@ import { refreshPlayerDerived } from "../data/generators.js";
 import { rand, pick, chance, clamp, formatMoney } from "../core/utils.js";
 import { injurePlayer } from "./injuries.js";
 import { bestXI, tacticalMatchup, teamStrength } from "./tactics.js";
-import { advanceHours } from "./time.js";
 import { ensurePlayerStats, ensureClubStats, clubRankings } from "./rankings.js";
 import { simulateMatchNarrative, buildLiveSnapshot } from "./matchSim.js";
 import { applyDisciplineFromMatch } from "./availability.js";
@@ -264,7 +263,7 @@ export function playNextMatch(game) {
   }
 
   if (game.state.day === game.state.boss.lastMatchDay) {
-    return { ok: false, msg: "Já jogou uma partida hoje. Avance o dia." };
+    return { ok: false, msg: "Já jogou uma partida hoje. O próximo jogo libera quando um novo dia começar." };
   }
 
   const check = game.canAct(MATCH_ENERGY_COST, 0, { allowLowHealth: true });
@@ -387,7 +386,7 @@ export function playNextMatch(game) {
       ensurePlayerStats(p);
       const isMine = game.state.squad.some((x) => x.id === p.id);
       if (isMine) {
-        p.stamina = clamp(p.stamina - rand(25, 40), 0, 100);
+        p.stamina = clamp(p.stamina - rand(25, 40), 0, p.maxStamina || 100);
         p.form = clamp(p.form + (won ? 4 : drew ? 1 : -3) + rand(-1, 2), 15, 99);
         p.morale = clamp(p.morale + (won ? 5 : drew ? 1 : -4), 10, 100);
       }
@@ -514,7 +513,6 @@ export function playNextMatch(game) {
   );
   if (seasonComplete) startNextSeason(game);
 
-  advanceHours(game, 3, true);
   game.notify(`Partida encerrada · +R$ ${formatMoney(prize)} no caixa.`, playerWon ? "info" : "warn");
   game.feed(resultText);
   game.commit();

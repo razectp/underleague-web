@@ -1,6 +1,5 @@
 import { REST_OPTIONS } from "../config/constants.js";
 import { chance, clamp } from "../core/utils.js";
-import { advanceHours } from "./time.js";
 
 export function rest(game, kind) {
   const conf = REST_OPTIONS[kind];
@@ -23,8 +22,7 @@ export function rest(game, kind) {
     }
   }
 
-  advanceHours(game, conf.h, true);
-  game.setCooldown("rest", conf.cd);
+  game.setCooldown("rest", conf.h);
   game.notify(`${conf.label}: +${conf.e} energia, saúde melhorou.`, "info");
   game.commit();
   return { ok: true };

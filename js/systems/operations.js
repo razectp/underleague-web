@@ -2,7 +2,6 @@ import { OPERATIONS, INJURY_TYPES, PRACAS } from "../config/constants.js";
 import { generatePlayer } from "../data/generators.js";
 import { rand, pick, chance, clamp, formatMoney } from "../core/utils.js";
 import { injureBoss, injurePlayer } from "./injuries.js";
-import { advanceHours } from "./time.js";
 
 export function runOperation(game, opId) {
   const op = OPERATIONS.find((x) => x.id === opId);
@@ -37,7 +36,6 @@ export function runOperation(game, opId) {
   successChance = clamp(successChance, 15, 92);
 
   const success = chance(successChance);
-  advanceHours(game, op.risk === "alto" ? 4 : 3, true);
   game.setCooldown("op_" + opId, op.risk === "alto" ? 10 : 6);
 
   if (!success) {

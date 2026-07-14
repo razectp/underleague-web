@@ -39,14 +39,6 @@ export function refreshChrome(game) {
   if (pillDay) pillDay.title = GLOSSARY.day;
   if (pillHealth) pillHealth.title = GLOSSARY.health;
 
-  const waitButton = $("#btn-tick");
-  if (waitButton) {
-    // Aguardar precisa permanecer como rota gratuita de passagem do tempo.
-    // Também libera saves antigos que ainda tenham manual_wait persistido.
-    waitButton.disabled = false;
-    waitButton.title = "Aguardar três horas";
-  }
-
   if (s.boss.injury) $("#top-health").classList.add("injured-flash");
   else $("#top-health").classList.remove("injured-flash");
 

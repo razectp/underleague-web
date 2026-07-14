@@ -148,7 +148,7 @@ export class Game {
       return { ok: false, reason: `Você está lesionado: ${b.injury.name} (${b.injury.daysLeft}d).` };
     }
     if (b.energy < energyCost) {
-      return { ok: false, reason: "Energia insuficiente. Descanse ou avance o tempo." };
+      return { ok: false, reason: "Energia insuficiente. Descanse ou aguarde a recuperação do clube." };
     }
     if (b.money < moneyCost) {
       return { ok: false, reason: "Dinheiro pessoal insuficiente." };
@@ -199,17 +199,6 @@ export class Game {
   /* —— sistemas (API pública estável) —— */
   advanceHours(h, silent) {
     advanceHours(this, h, silent);
-  }
-
-  wait() {
-    // Passar o tempo é a saída de recuperação do jogador. Bloquear esta
-    // ação por um cooldown que só diminui quando o tempo passa cria softlock
-    // quando não há energia ou dinheiro para outra atividade.
-    delete this.state.boss.cooldowns.manual_wait;
-    advanceHours(this, 3, true);
-    this.notify("Três horas se passaram no clube.", "info");
-    this.commit();
-    return { ok: true };
   }
 
   rest(kind) {

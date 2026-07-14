@@ -1,6 +1,5 @@
 import { CIRCUIT_ENERGY_COST, STANDARD_OPPONENTS } from "../config/constants.js";
 import { chance, clamp, formatMoney, pick, rand } from "../core/utils.js";
-import { advanceHours } from "./time.js";
 import { bestXI, tacticalMatchup, teamStrength } from "./tactics.js";
 import { simulateMatchNarrative, buildLiveSnapshot } from "./matchSim.js";
 import { applyDisciplineFromMatch } from "./availability.js";
@@ -174,7 +173,7 @@ export function playCircuitMatch(game, rivalId) {
   myXI.forEach((shadow) => {
     const p = game.state.squad.find((x) => x.id === shadow.id);
     if (!p) return;
-    p.stamina = clamp(p.stamina - rand(12, 20), 0, 100);
+    p.stamina = clamp(p.stamina - rand(12, 20), 0, p.maxStamina || 100);
     p.form = clamp(p.form + (won ? 2 : drew ? 0 : -1), 15, 99);
     p.morale = clamp(p.morale + (won ? 3 : drew ? 1 : -2), 10, 100);
   });
@@ -239,7 +238,6 @@ export function playCircuitMatch(game, rivalId) {
     game.feed(`${game.state.club.name} concluiu a volta ${playedTour} do Circuito! Rivais mais fortes chegaram.`);
   }
 
-  advanceHours(game, 2, true);
   const starTxt = stars === 3 ? " ★★★ perfeito!" : ` · ${stars}/3 estrelas`;
   game.notify(
     `Circuito registrado · +R$ ${formatMoney(reward)}${starTxt}`,

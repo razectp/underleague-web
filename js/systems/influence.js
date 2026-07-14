@@ -1,6 +1,5 @@
 import { INFLUENCE_ENERGY, INFLUENCE_MONEY, PRACAS } from "../config/constants.js";
 import { clamp, formatMoney, rand } from "../core/utils.js";
-import { advanceHours } from "./time.js";
 
 export function influenceRanking(game, pracaId) {
   const praca = PRACAS.find((p) => p.id === pracaId);
@@ -55,7 +54,6 @@ export function strengthenInfluence(game, pracaId) {
   game.state.boss.energy -= INFLUENCE_ENERGY;
   club.bank -= INFLUENCE_MONEY;
   club.influence[pracaId] = clamp(before + gain, 0, 100);
-  advanceHours(game, 3, true);
   game.setCooldown("influence", 6);
   game.state.boss.rep += 2;
   club.prestige += 1;

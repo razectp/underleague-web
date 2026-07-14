@@ -51,7 +51,6 @@ export function enableServerAuthority(game) {
     train: (id) => ({ id }),
     trainSquadFocus: (playerId, attr) => ({ playerId, attr }),
     rest: (kind) => ({ kind }),
-    wait: () => ({}),
     medicalCare: (target) => ({ target }),
     runOperation: (opId) => ({ opId }),
     buyPlayer: (id) => ({ id }),

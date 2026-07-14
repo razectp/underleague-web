@@ -3,7 +3,11 @@
  * Altere números de balanceamento e catálogos aqui.
  */
 
-export const VERSION = 5;
+export const VERSION = 6;
+
+/** O mundo avança 24 horas de jogo a cada 5 horas reais do servidor. */
+export const REAL_MS_PER_GAME_DAY = 5 * 60 * 60 * 1000;
+export const REAL_MS_PER_GAME_HOUR = REAL_MS_PER_GAME_DAY / 24;
 
 /** Taxa de marketplace (3%) — receita futura da plataforma */
 export const MARKET_FEE_RATE = 0.03;
@@ -212,10 +216,10 @@ export const SEASON_THEMES = [
 
 /** Filosofia do técnico (afeta stats iniciais) */
 export const STYLES = {
-  equilibrio: { tatica: 12, scouting: 10, negocio: 10, lideranca: 10, condicionamento: 12 },
-  ataque: { tatica: 14, scouting: 8, negocio: 8, lideranca: 10, condicionamento: 14 },
-  defesa: { tatica: 14, scouting: 10, negocio: 8, lideranca: 12, condicionamento: 12 },
-  negocio: { tatica: 8, scouting: 14, negocio: 16, lideranca: 8, condicionamento: 8 }
+  equilibrio: { tatica: 14, scouting: 12, negocio: 12, lideranca: 12, condicionamento: 14 },
+  ataque: { tatica: 16, scouting: 10, negocio: 10, lideranca: 12, condicionamento: 16 },
+  defesa: { tatica: 16, scouting: 12, negocio: 10, lideranca: 14, condicionamento: 14 },
+  negocio: { tatica: 10, scouting: 16, negocio: 18, lideranca: 10, condicionamento: 10 }
 };
 
 /**
@@ -250,7 +254,7 @@ export const CLUB_TYPES = {
 };
 
 export const REST_OPTIONS = {
-  short: { h: 2, e: 36, heal: 6, cost: 0, label: "Soneca", cd: 1 },
-  long: { h: 6, e: 80, heal: 14, cost: 30, label: "Noite de sono", cd: 4 },
-  spa: { h: 4, e: 65, heal: 24, cost: 150, label: "Spa / recuperação", cd: 4 }
+  short: { h: 2, e: 36, heal: 6, cost: 0, label: "Soneca" },
+  long: { h: 6, e: 80, heal: 14, cost: 30, label: "Noite de sono" },
+  spa: { h: 4, e: 65, heal: 24, cost: 150, label: "Spa / recuperação" }
 };

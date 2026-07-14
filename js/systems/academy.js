@@ -1,7 +1,6 @@
 import { SQUAD_MAX } from "../config/constants.js";
 import { chance, clamp, formatMoney, rand } from "../core/utils.js";
 import { generatePlayer } from "../data/generators.js";
-import { advanceHours } from "./time.js";
 
 export function academyUpgradeCost(level) {
   return [0, 2500, 6000, 12000, 22000][level] || null;
@@ -46,7 +45,6 @@ export function promoteYouth(game) {
   player.salary = Math.max(25, Math.floor(player.salary * 0.55));
   player.academyGraduate = true;
   game.state.squad.push(player);
-  advanceHours(game, 4, true);
   game.setCooldown("academy_intake", 168);
   game.state.boss.rep += 2;
   game.addXp(10);

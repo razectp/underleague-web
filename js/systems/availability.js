@@ -114,7 +114,7 @@ function buildCoachWarnings(groups, fit, total) {
   if (groups.exhausted.length) {
     w.push({
       level: "info",
-      text: `${groups.exhausted.length} exausto(s) — avance o tempo ou rode o elenco.`
+      text: `${groups.exhausted.length} exausto(s) — aguarde a recuperação ou rode o elenco.`
     });
   }
   return w;

@@ -7,13 +7,13 @@ import { APPROACHES, CIRCUIT_ENERGY_COST, MATCH_ENERGY_COST } from "../config/co
 
 /** Glossário curto (hover / primeira leitura) */
 export const GLOSSARY = {
-  energy: "Energia: gasta em treinos, jogos e operações. Recupera com descanso ou com o tempo.",
+  energy: "Energia: gasta em treinos, jogos e operações. Recupera com descanso e com o relógio do clube.",
   money: "Seu bolso: dinheiro pessoal do dirigente. Missões e alguns treinos usam isto.",
   clubBank: "Caixa do clube: salários, mercado e prêmios de jogo entram aqui.",
   rep: "Prestígio: fama do projeto. Sobe com vitórias e missões.",
   health: "Disposição: se cair demais, ações ficam bloqueadas. Descanse ou vá ao médico.",
   ovr: "OVR: força geral do jogador. Quanto maior, melhor no XI.",
-  day: "Dia da temporada. A liga permite 1 partida oficial por dia."
+  day: "Dia da temporada. Cada dia dura 5 horas reais e a liga permite 1 partida oficial por dia."
 };
 
 /**
@@ -128,8 +128,8 @@ export function suggestNextAction(game) {
 
   return {
     id: "wait",
-    title: "Aguardar ou descansar",
-    why: "Sem energia ou com cooldowns — avance o tempo e volte.",
+    title: "Descansar e recuperar",
+    why: "Sem energia ou com atividades em recuperação — descanse ou volte mais tarde.",
     view: "rest",
     primary: false
   };

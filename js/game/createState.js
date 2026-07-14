@@ -84,9 +84,10 @@ export function createInitialState({ name, clubName: clubLabel, style, clubType 
   // Elenco inicial = a "turma" da escolinha/time (forma alta = early game confiante)
   let squad = generateSquad(clubId, type.squadQuality, 16);
   squad.forEach((p) => {
-    p.form = Math.min(92, Math.max(p.form, rand(64, 84)));
-    p.morale = Math.min(92, Math.max(p.morale, rand(62, 84)));
-    p.stamina = 100;
+    p.form = Math.min(94, Math.max(p.form, rand(74, 90)));
+    p.morale = Math.min(94, Math.max(p.morale, rand(72, 90)));
+    p.maxStamina = 110;
+    p.stamina = 110;
   });
   if (type.youthBias) {
     squad = squad.map((p) => {
@@ -151,9 +152,9 @@ export function createInitialState({ name, clubName: clubLabel, style, clubType 
       id: bossId,
       name: name.trim().slice(0, 20),
       money: 6500,
-      energy: 100,
-      maxEnergy: 100,
-      rep: 18,
+      energy: 120,
+      maxEnergy: 120,
+      rep: 20,
       xp: 0,
       level: 1,
       stats: { ...styleStats },
@@ -192,6 +193,7 @@ export function createInitialState({ name, clubName: clubLabel, style, clubType 
     seasonGoals: null,
     lastPostMatch: null,
     tutorial: { step: 0, done: false },
+    serverClockAt: Date.now(),
     createdAt: Date.now(),
     savedAt: Date.now()
   };
@@ -218,6 +220,11 @@ export function migrateState(state) {
   if (!state.seasonHistory) state.seasonHistory = [];
   if (!state.seasonTheme) state.seasonTheme = SEASON_THEMES[(Math.max(1, state.season || 1) - 1) % SEASON_THEMES.length];
   if (!state.trophies) state.trophies = [];
+  if (fromVersion < 6 || !Number.isFinite(state.serverClockAt)) {
+    // Saves existentes começam a contar do primeiro acesso após a atualização;
+    // nunca inferimos tempo offline a partir de um timestamp antigo ou do cliente.
+    state.serverClockAt = Date.now();
+  }
   if (fromVersion < 4) {
     const migrateInfluence = (club) => {
       club.influence = club.influence || {};
@@ -298,8 +305,11 @@ export function migrateState(state) {
       if (p.seasonYellows == null) p.seasonYellows = 0;
       if (p.suspension === undefined) p.suspension = null;
       if (p.contractYears == null) p.contractYears = rand(1, 4);
+      if (!Number.isFinite(p.maxStamina)) p.maxStamina = 100;
       refreshPlayerDerived(p);
-      p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
+      if (fromVersion < 3 || !Number.isFinite(p.salary)) {
+        p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
+      }
     });
   }
   if (!state.lineup) state.lineup = { starters: [], bench: [], auto: true };
@@ -311,13 +321,17 @@ export function migrateState(state) {
   if (Array.isArray(state.npcs)) {
     state.npcs.flatMap((c) => c.squad || []).forEach((p) => {
       refreshPlayerDerived(p);
-      p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
+      if (fromVersion < 3 || !Number.isFinite(p.salary)) {
+        p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
+      }
     });
   }
   if (Array.isArray(state.market)) {
     state.market.forEach((p) => {
       refreshPlayerDerived(p);
-      p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
+      if (fromVersion < 3 || !Number.isFinite(p.salary)) {
+        p.salary = Math.max(35, Math.floor((p.value || 0) / 55));
+      }
       if (p.onMarket && fromVersion < 5) p.marketPrice = Math.floor(p.value * 1.05);
     });
   }

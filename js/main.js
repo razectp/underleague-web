@@ -228,17 +228,6 @@ function bindGlobal() {
     }
   });
 
-  $("#btn-tick")?.addEventListener("click", async () => {
-    if (!game.state) return;
-    try {
-      const result = await game.wait();
-      if (result && result.ok === false) toast(result.msg || result.error, "warn");
-    } catch (e) {
-      toast(e?.message || "Falha ao aguardar.", "bad");
-    }
-    app.render();
-  });
-
   $("#btn-sync-state")?.addEventListener("click", async () => {
     const loaded = await loadServerState();
     if (!loaded.ok || !loaded.hasGame) {

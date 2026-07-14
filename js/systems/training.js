@@ -2,7 +2,6 @@ import { TRAININGS, SKILL_PROGRESS } from "../config/constants.js";
 import { pick, chance, clamp } from "../core/utils.js";
 import { refreshPlayerDerived } from "../data/generators.js";
 import { injureBoss, injurePlayer } from "./injuries.js";
-import { advanceHours } from "./time.js";
 import {
   ensureBossSkillXp,
   ensurePlayerAttrXp,
@@ -33,7 +32,6 @@ export function train(game, trainId) {
 
   if (chance(Math.max(2, risk))) {
     injureBoss(game);
-    advanceHours(game, 2, true);
     game.notify("Treino mal executado — você se lesionou!", "bad");
     game.commit();
     return { ok: false, msg: "Lesão durante o treino." };
@@ -50,7 +48,6 @@ export function train(game, trainId) {
 
   game.state.boss.rep += t.rep;
   game.addXp(5 + result.levelsGained * 8 + Math.floor(xpGain / 10));
-  advanceHours(game, 2, true);
   game.setCooldown("train_" + trainId, SKILL_PROGRESS.bossTrainCooldownH);
 
   // Liderança: elenco só ganha XP parcial (não +1 direto)
@@ -67,7 +64,7 @@ export function train(game, trainId) {
       p[a] = sub.level;
       ax[a] = sub.xp;
       refreshPlayerDerived(p);
-      p.stamina = clamp(p.stamina - 6, 0, 100);
+      p.stamina = clamp(p.stamina - 6, 0, p.maxStamina || 100);
     }
   }
 
@@ -108,9 +105,8 @@ export function trainSquadFocus(game, playerId, attr) {
 
   game.spend(costE, costM);
 
-  if (chance(4 + (100 - p.stamina) / 12)) {
+  if (chance(4 + ((p.maxStamina || 100) - p.stamina) / 12)) {
     injurePlayer(game, p);
-    advanceHours(game, 1, true);
     game.notify(`${p.name} se lesionou no treino individual!`, "bad");
     game.commit();
     return { ok: false, msg: "Lesão no elenco." };
@@ -126,10 +122,9 @@ export function trainSquadFocus(game, playerId, attr) {
   p[attr] = result.level;
   ax[attr] = result.xp;
   refreshPlayerDerived(p);
-  p.stamina = clamp(p.stamina - 18, 0, 100);
+  p.stamina = clamp(p.stamina - 18, 0, p.maxStamina || 100);
   p.form = clamp(p.form + (result.levelsGained ? 2 : 1), 1, 99);
 
-  advanceHours(game, 1, true);
   game.setCooldown("squad_train", SKILL_PROGRESS.squadTrainCooldownH);
   game.addXp(4 + result.levelsGained * 5);
 
