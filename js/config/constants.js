@@ -5,7 +5,7 @@
 
 export const VERSION = 9;
 
-/** O mundo avança 24 horas de jogo a cada 5 horas reais do servidor. */
+/** Tempo do clube: 24 h de jogo a cada 5 h reais (autoritativo no backend). */
 export const REAL_MS_PER_GAME_DAY = 5 * 60 * 60 * 1000;
 export const REAL_MS_PER_GAME_HOUR = REAL_MS_PER_GAME_DAY / 24;
 

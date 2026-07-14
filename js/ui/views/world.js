@@ -250,10 +250,10 @@ export function viewLog(_game, s) {
 
   return `
     <h1 class="view-title">Crônicas do clube</h1>
-    <p class="view-sub">Histórico de ${s.club.name} e comissões rivais (gestão no servidor).</p>
+    <p class="view-sub">Histórico de ${s.club.name} e comissões rivais (tempo do clube).</p>
     <div class="panel">
       <h3>Comissões da liga <span class="tag">${(s.npcs || []).length} bots</span></h3>
-      <div class="badge ok" style="margin-bottom:0.5rem">Sempre ativas no relógio do servidor · 1 ciclo/dia · treino ou mercado (não os dois)</div>
+      <div class="badge ok" style="margin-bottom:0.5rem">Sempre ativas a cada dia de jogo (≈ 5 h reais) · 1 ciclo/dia · treino ou mercado (não os dois)</div>
       <div class="action-list">${rivalCards || `<div class="empty">Sem rivais.</div>`}</div>
     </div>
     <div class="panel">

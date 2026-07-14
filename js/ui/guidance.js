@@ -13,7 +13,7 @@ export const GLOSSARY = {
   rep: "Prestígio: fama do projeto. Sobe com vitórias e missões.",
   health: "Disposição: se cair demais, ações ficam bloqueadas. Descanse ou vá ao médico.",
   ovr: "OVR: força geral do jogador. Quanto maior, melhor no XI.",
-  day: "Dia da temporada. Cada dia dura 5 horas reais e a liga permite 1 partida oficial por dia."
+  day: "Dia de jogo do clube. O tempo do jogo corre sozinho: 1 dia ≈ 5 horas reais. A liga permite 1 partida oficial por dia de jogo."
 };
 
 /**
@@ -90,7 +90,7 @@ export function suggestNextAction(game) {
     return {
       id: "wait-day",
       title: "Aguarde o próximo dia",
-      why: "Você já jogou a liga hoje. O relógio do servidor libera a próxima rodada (e as comissões rivais rodam na virada do dia).",
+      why: "Você já jogou a liga neste dia de jogo. Quando o dia do clube virar (≈ 5 h reais), libera a próxima rodada e as comissões rivais também avançam.",
       view: "home",
       primary: false
     };

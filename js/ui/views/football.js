@@ -168,7 +168,7 @@ export function viewMatch(game, s) {
         <div class="score">vs</div>
         <div class="team"><div>${opp.name}</div><small style="color:var(--muted);font-family:var(--mono)">${where}</small></div>
       </div>
-      <p style="text-align:center;color:var(--muted);margin-bottom:0.8rem">Custa ⚡${MATCH_ENERGY_COST} · <strong>1 partida de liga por dia do clube</strong> (relógio do servidor) · prêmio no caixa</p>
+      <p style="text-align:center;color:var(--muted);margin-bottom:0.8rem">Custa ⚡${MATCH_ENERGY_COST} · <strong>1 partida de liga por dia de jogo</strong> (cada dia do clube ≈ 5 h reais) · prêmio no caixa</p>
       <p class="tactical-note">Força ${myPower} × ${oppPower} · comissão rival: ${opp.formation}, ${opp.mentality}, ${APPROACHES[opp.approach]?.label || "estilo desconhecido"}${opp.ai?.plan ? ` · plano D${opp.ai.plan.day}` : ""}. ${fit.reasons.join("; ")}.</p>
       ${opp.ai?.plan ? `<p class="tactical-note" style="opacity:0.9">Leitura da comissão: deve manter ${opp.ai.plan.formation} / ${APPROACHES[opp.ai.plan.approach]?.label || opp.ai.plan.approach} com mentalidade ${opp.ai.plan.mentality}.</p>` : ""}
       <div class="btn-row is-center">

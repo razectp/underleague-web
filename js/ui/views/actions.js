@@ -105,7 +105,7 @@ export function viewRest(game, s) {
     </div>
     <div class="panel">
       <h3>Na rotina</h3>
-      <p style="color:var(--muted);font-size:0.9rem">O relógio continua no servidor mesmo quando você sai. Cada dia do clube dura 5 horas reais; 1h do clube equivale a 12min30s reais.</p>
+      <p style="color:var(--muted);font-size:0.9rem">O tempo do clube corre sozinho, mesmo quando você sai. Cada <strong>dia de jogo</strong> dura ≈ 5 horas reais; 1 h do clube ≈ 12 min 30 s reais. A liga respeita esse dia — 1 partida oficial por dia de jogo.</p>
     </div>`;
 }
 
