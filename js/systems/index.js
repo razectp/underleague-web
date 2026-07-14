@@ -1,6 +1,9 @@
 /**
  * Barrel dos systems — atalho de imports em testes / ferramentas.
  * A UI deve preferir a facade Game.
+ *
+ * Estado de campanha é autoritativo no servidor/banco; estes módulos
+ * só definem regras. Preferências de UI (prefs) não fazem parte do save.
  */
 
 export * from "./time.js";
@@ -18,7 +21,6 @@ export * from "./circuit.js";
 export * from "./academy.js";
 export * from "./missions.js";
 export * from "./skillProgress.js";
-export * from "./training.js";
 export * from "./rankings.js";
 export * from "./availability.js";
 export * from "./lineup.js";
@@ -26,3 +28,6 @@ export * from "./finance.js";
 export * from "./facilities.js";
 export * from "./seasonGoals.js";
 export * from "./matchSim.js";
+export * from "./npcAi.js";
+export * from "./npcEvolve.js";
+export * from "./prefs.js";

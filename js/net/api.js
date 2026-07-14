@@ -1,10 +1,20 @@
 /**
  * Cliente HTTP — API na mesma origem (local) ou em VPS (apiBase).
+ *
+ * Persistência de campanha: somente no servidor/banco via /api/game/*.
+ * No navegador só o token de sessão (e prefs de UI em prefs.js).
  */
 
 import { apiUrl, getRuntimeConfig } from "../config/runtime.js";
 
 const TOKEN_KEY = "underleague_token";
+
+/** Chaves de localStorage permitidas no cliente (nunca estado de jogo). */
+export const BROWSER_STORAGE_KEYS = Object.freeze([
+  TOKEN_KEY,
+  "underleague_prefs_v1",
+  "ul_nav_more"
+]);
 
 export function getToken() {
   try {
@@ -105,11 +115,26 @@ export const api = {
   lobby: () => request("/api/lobby", { auth: false })
 };
 
-export async function isServerUp() {
+/**
+ * @returns {Promise<{ ok: boolean, health?: object, error?: string }>}
+ */
+export async function probeServer() {
   try {
     const r = await api.health();
-    return !!r.ok;
+    if (r?.ok) return { ok: true, health: r };
+    return {
+      ok: false,
+      error: r?.error || "O jogo está temporariamente indisponível. Tente novamente em instantes."
+    };
   } catch {
-    return false;
+    return {
+      ok: false,
+      error: "O jogo está temporariamente indisponível. Tente novamente em instantes."
+    };
   }
+}
+
+export async function isServerUp() {
+  const probe = await probeServer();
+  return probe.ok;
 }

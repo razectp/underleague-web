@@ -22,8 +22,23 @@ export async function refreshLobby(game) {
   const enterRow = $("#lobby-enter-row");
   const demoButton = $("#btn-demo");
   const demoBox = $("#demo-box");
+  const portalFoot = $("#portal-foot");
 
-  // status da campanha carregada do servidor
+  function setDemoUi(enabled) {
+    const on = Boolean(enabled);
+    for (const el of [demoButton, demoBox]) {
+      if (!el) continue;
+      el.classList.toggle("hidden", !on);
+      el.hidden = !on;
+    }
+    if (portalFoot) {
+      portalFoot.textContent = on
+        ? "Under League · demo local: teste / senha123"
+        : "Under League · progresso salvo na conta online";
+    }
+  }
+
+  // status da campanha carregada do servidor (banco)
   if (statusEl) {
     if (game?.state) {
       const s = game.state;
@@ -50,12 +65,11 @@ export async function refreshLobby(game) {
     }
   }
 
-  // rankings públicos
+  // rankings públicos (somente API/banco)
   try {
     const data = await api.lobby();
     if (!data.ok) throw new Error(data.error || "lobby fail");
-    demoButton?.classList.toggle("hidden", !data.demo);
-    demoBox?.classList.toggle("hidden", !data.demo);
+    setDemoUi(data.demo);
 
     if (clubsEl) {
       const rows = (data.clubs || [])
@@ -100,14 +114,9 @@ export async function refreshLobby(game) {
       feedEl.innerHTML = items || `<p class="empty">Sem confrontos PvP ainda.</p>`;
     }
 
-    if (newsEl && data.demo) {
-      // mantém notícias base; prepend demo tip se vazio de server news
-    }
-
     return data;
   } catch {
-    demoButton?.classList.add("hidden");
-    demoBox?.classList.add("hidden");
+    setDemoUi(false);
     if (clubsEl) clubsEl.innerHTML = `<p class="empty">O ranking está temporariamente indisponível.</p>`;
     if (scorersEl) scorersEl.innerHTML = `<p class="empty">—</p>`;
     if (feedEl) feedEl.innerHTML = `<p class="empty">O feed está temporariamente indisponível.</p>`;

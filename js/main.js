@@ -1,6 +1,6 @@
 /**
  * Bootstrap Under League
- * Portal (homepage) + jogo · demo: teste / senha123
+ * Portal + jogo always-online. Campanha só no banco (API).
  *
  * Preferir: servir.bat → http://127.0.0.1:3000
  */
@@ -9,15 +9,17 @@ import { game } from "./game/Game.js";
 import { createApp } from "./ui/App.js";
 import { $, toast } from "./ui/dom.js";
 import { refreshChrome } from "./ui/chrome.js";
-import { api, setToken, getToken, isServerUp } from "./net/api.js";
+import { api, setToken, getToken, probeServer } from "./net/api.js";
 import { enableServerAuthority } from "./net/serverAuthority.js";
 import { managerName } from "./data/generators.js";
 import { refreshLobby, fillDemoCredentials } from "./ui/lobby.js";
 
 const app = createApp(game);
 game.toastVia = toast;
-// O cliente nunca executa mutações locais: o servidor é obrigatório.
+// O cliente nunca executa mutações locais: o servidor/banco é obrigatório.
 enableServerAuthority(game);
+
+let lastServerOk = null;
 
 function setCampaignAccess({ connected = false, hasGame = false } = {}) {
   const createPanel = $("#panel-create");
@@ -272,6 +274,11 @@ function bindGlobal() {
   });
 
   $("#btn-demo")?.addEventListener("click", async () => {
+    const btn = $("#btn-demo");
+    if (btn?.hidden || btn?.classList.contains("hidden")) {
+      toast("Conta demo indisponível neste ambiente.", "warn");
+      return;
+    }
     fillDemoCredentials();
     toast("Entrando na conta demo…", "info");
     await doLogin("teste", "senha123", { autoEnter: true });
@@ -347,6 +354,10 @@ function bindGlobal() {
     syncServerQuiet();
   }, 60000);
 
+  setInterval(() => {
+    checkServer({ quiet: true });
+  }, 120000);
+
   ["input-email", "input-password"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -364,9 +375,13 @@ function bindGlobal() {
   });
 }
 
-async function checkServer() {
+/**
+ * @param {{ quiet?: boolean }} [opts]
+ */
+async function checkServer({ quiet = false } = {}) {
   const dot = $("#server-dot");
-  const up = await isServerUp();
+  const probe = await probeServer();
+  const up = probe.ok;
   if (dot) {
     if (up) {
       dot.textContent = "Jogo disponível";
@@ -374,24 +389,36 @@ async function checkServer() {
       dot.className = "badge ok";
     } else {
       dot.textContent = "Jogo temporariamente indisponível";
-      dot.removeAttribute("title");
+      dot.title = probe.error || "Sem conexão com o servidor";
       dot.className = "badge warn";
     }
   }
+  if (!quiet && lastServerOk === true && !up) {
+    toast(
+      probe.error || "O jogo está temporariamente indisponível. Seu progresso permanece salvo na conta.",
+      "bad"
+    );
+  }
+  if (!quiet && lastServerOk === false && up) {
+    toast("Conexão restabelecida. Atualizando progresso…", "info");
+  }
+  lastServerOk = up;
+
   if (getToken() && up) {
     try {
       const me = await api.me();
       if (me.ok) {
         setAccountUi(me.user);
         await loadServerState();
-      }
-      else {
+      } else {
         setToken(null);
         setAccountUi(null);
       }
     } catch {
       /* ignore */
     }
+  } else if (!up && getToken() && $("#screen-game")?.classList.contains("active") && !quiet) {
+    toast("Sem conexão com o servidor. Aguarde e tente novamente — o progresso não é salvo no aparelho.", "warn");
   }
   return up;
 }
