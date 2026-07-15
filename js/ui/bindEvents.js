@@ -29,8 +29,17 @@ export function bindViewEvents(game, app) {
       app.render();
       return;
     }
-    if (result && result.ok === false && (result.msg || result.error)) {
-      toast(result.msg || result.error, failType);
+    // Com autoridade no servidor, game.notify não chega no browser.
+    // O texto de feedback vem em result.msg (sucesso ou falha).
+    if (result && result.ok === false) {
+      const err = result.msg || result.error;
+      if (err) toast(err, failType);
+    } else if (result?.msg) {
+      const kind =
+        result.toastType === "bad" || result.toastType === "warn"
+          ? result.toastType
+          : "info";
+      toast(result.msg, kind);
     }
     app.render();
     return result;
