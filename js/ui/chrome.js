@@ -25,7 +25,11 @@ export function refreshChrome(game) {
   $("#top-energy").textContent = Math.floor(s.boss.energy);
   $("#top-energy").parentElement.querySelector(".pill-max").textContent = `/${s.boss.maxEnergy}`;
   $("#top-rep").textContent = s.boss.rep;
-  $("#top-day").textContent = timeStr(s);
+  const clockEl = $("#top-day");
+  if (clockEl) {
+    clockEl.textContent = timeStr(s);
+    clockEl.dataset.liveClock = "1";
+  }
   $("#top-health").textContent = `${Math.floor(s.boss.health)}%`;
 
   const pillMoney = $("#top-money")?.closest(".pill");
@@ -36,7 +40,10 @@ export function refreshChrome(game) {
   if (pillMoney) pillMoney.title = GLOSSARY.money;
   if (pillEnergy) pillEnergy.title = GLOSSARY.energy;
   if (pillRep) pillRep.title = GLOSSARY.rep;
-  if (pillDay) pillDay.title = GLOSSARY.day;
+  if (pillDay) {
+    pillDay.title =
+      `${GLOSSARY.day} Horário do clube em andamento (minutos avançam sozinhos).`;
+  }
   if (pillHealth) pillHealth.title = GLOSSARY.health;
 
   if (s.boss.injury) $("#top-health").classList.add("injured-flash");

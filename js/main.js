@@ -9,6 +9,7 @@ import { game } from "./game/Game.js";
 import { createApp } from "./ui/App.js";
 import { $, toast } from "./ui/dom.js";
 import { refreshChrome } from "./ui/chrome.js";
+import { timeStr } from "./ui/format.js";
 import { api, setToken, getToken, probeServer } from "./net/api.js";
 import { enableServerAuthority } from "./net/serverAuthority.js";
 import { managerName } from "./data/generators.js";
@@ -423,6 +424,16 @@ async function checkServer({ quiet = false } = {}) {
   return up;
 }
 
+/** Atualiza só o texto do relógio do clube (minutos) sem re-render completo. */
+function tickGameClock() {
+  if (!$("#screen-game")?.classList.contains("active")) return;
+  if (!game.state) return;
+  const el = $("#top-day");
+  if (!el) return;
+  const next = timeStr(game.state);
+  if (el.textContent !== next) el.textContent = next;
+}
+
 function init() {
   bindGlobal();
   game.on(() => {
@@ -430,6 +441,9 @@ function init() {
       refreshChrome(game);
     }
   });
+
+  // 1 s real ≈ fração de minuto de jogo; mantém o topo “vivo”.
+  setInterval(tickGameClock, 1000);
 
   setAccountUi(null);
   app.showBoot();
