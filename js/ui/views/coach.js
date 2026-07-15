@@ -122,12 +122,29 @@ export function viewPostMatch(game, s) {
   }
   const result =
     pm.playerWon ? "Vitória" : pm.playerDraw ? "Empate" : "Derrota";
+  const reactions = pm.reactions;
+  const reactionHtml = reactions
+    ? `
+    <div class="panel">
+      <h3>Na imprensa e no vestiário</h3>
+      <p class="hero-line" style="margin-bottom:0.65rem">${reactions.headline || ""}</p>
+      ${(reactions.lines || [])
+        .map((line) => `<div class="feed-item">${line}</div>`)
+        .join("") || `<div class="empty">Sem reações extras.</div>`}
+      ${
+        reactions.metrics
+          ? `<p class="micro-help" style="margin-top:0.55rem">Métricas: gols ${reactions.metrics.totalGoals} · amarelos ${reactions.metrics.yellows} · vermelhos ${reactions.metrics.reds} · pênaltis ${reactions.metrics.pens}</p>`
+          : ""
+      }
+    </div>`
+    : "";
   return `
     <h1 class="view-title">Pós-jogo</h1>
     <p class="view-sub">${pm.home} ${pm.hg}–${pm.ag} ${pm.away} · ${result} · Dia ${pm.day}</p>
     <div class="hero-line">
       Prêmio R$ ${formatMoney(pm.prize)}${pm.themeBonus ? ` · tema +R$ ${formatMoney(pm.themeBonus)}` : ""}
     </div>
+    ${reactionHtml}
     <div class="grid-2">
       <div class="panel">
         <h3>Lances-chave</h3>

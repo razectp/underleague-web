@@ -28,6 +28,7 @@ export * from "./finance.js";
 export * from "./facilities.js";
 export * from "./seasonGoals.js";
 export * from "./matchSim.js";
+export * from "./matchReactions.js";
 export * from "./npcAi.js";
 export * from "./npcEvolve.js";
 export * from "./prefs.js";

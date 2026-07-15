@@ -12,6 +12,7 @@ import { homeGateBonus } from "./facilities.js";
 import { evolveNpcs } from "./npcEvolve.js";
 import { ensureSeasonGoals } from "./seasonGoals.js";
 import { recordNpcIncome, selectNpcXI } from "./npcAi.js";
+import { publishMatchEntertainment } from "./matchReactions.js";
 
 /** Temporada completa em turno e returno: todos os clubes jogam em cada rodada. */
 export function generateFixtures(game) {
@@ -561,7 +562,6 @@ export function playNextMatch(game) {
   simulateRestOfRound(game, fixture.round, fixture);
   game.state.nextFixtureIndex = index + 1;
 
-  const resultText = `${homeClub.name} ${hg} x ${ag} ${awayClub.name}`;
   game.state.lastMatch = {
     home: homeClub.name,
     away: awayClub.name,
@@ -608,8 +608,26 @@ export function playNextMatch(game) {
   );
   if (seasonComplete) startNextSeason(game);
 
-  game.notify(`Partida encerrada · +R$ ${formatMoney(prize)} no caixa.`, playerWon ? "info" : "warn");
-  game.feed(resultText);
+  const prizeLine = `Partida encerrada · +R$ ${formatMoney(prize)} no caixa${
+    themeBonus ? ` (tema +R$ ${formatMoney(themeBonus)})` : ""
+  }.`;
+  const reaction = publishMatchEntertainment(game, {
+    homeName: homeClub.name,
+    awayName: awayClub.name,
+    hg,
+    ag,
+    events,
+    playerIsHome,
+    round: fixture.round,
+    playerFixture: fixture,
+    prizeText: prizeLine
+  });
+  game.state.lastPostMatch.reactions = {
+    headline: reaction.headline,
+    lines: reaction.lines,
+    metrics: reaction.metrics
+  };
+  game.notify(reaction.toast, reaction.toastType);
   game.commit();
 
   const live = buildLiveSnapshot({
@@ -624,7 +642,14 @@ export function playNextMatch(game) {
   });
   game.state.liveMatch = live;
 
-  return { ok: true, match: game.state.lastMatch, live, postMatch: game.state.lastPostMatch };
+  return {
+    ok: true,
+    msg: reaction.toast,
+    toastType: reaction.toastType,
+    match: game.state.lastMatch,
+    live,
+    postMatch: game.state.lastPostMatch
+  };
 }
 
 /** Classificação da liga (pontos) + métricas extras para UI legada */

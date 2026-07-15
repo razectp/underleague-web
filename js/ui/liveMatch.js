@@ -135,12 +135,21 @@ export function openLiveMatch(live, opts = {}) {
   const closeBtn = root.querySelector("#live-close");
   const footMsg = root.querySelector("#live-footer-msg");
 
-  const appendEvent = (ev) => {
+  /**
+   * @param {object} ev
+   * @param {{ updateScore?: boolean }} [opts]
+   * updateScore=false ao despejar eventos no fim — o placar sealed é a verdade
+   * (senão gols já contados / reprocessados viram 6–1 com final 3–1).
+   */
+  const appendEvent = (ev, opts = {}) => {
+    const updateScore = opts.updateScore !== false;
     const row = document.createElement("div");
     row.className = kindClass(ev.kind);
     row.innerHTML = `<time>${ev.min}'</time><span>${escapeHtml(ev.text)}</span>`;
     feedEl.appendChild(row);
     feedEl.scrollTop = feedEl.scrollHeight;
+
+    if (!updateScore) return;
 
     if (
       ev.kind === "goal" ||
@@ -153,7 +162,7 @@ export function openLiveMatch(live, opts = {}) {
       agEl.textContent = String(state.scoreA);
       row.classList.add("pulse");
     } else if (ev.kind === "own_goal") {
-      // gol contra: side = quem sofreu o lance / marcou contra → sobe pro adversário
+      // gol contra: side = quem cometeu → sobe pro adversário
       if (ev.side === "home") state.scoreA += 1;
       else if (ev.side === "away") state.scoreH += 1;
       hgEl.textContent = String(state.scoreH);
@@ -162,22 +171,27 @@ export function openLiveMatch(live, opts = {}) {
     }
   };
 
-  const finish = () => {
-    clearTimer();
-    state.running = false;
-    state.clock = 90;
-    // Revela placar final sealed (fonte da verdade)
+  const applySealedScore = () => {
     state.scoreH = live.finalHome;
     state.scoreA = live.finalAway;
     hgEl.textContent = String(live.finalHome);
     agEl.textContent = String(live.finalAway);
+  };
+
+  const finish = () => {
+    clearTimer();
+    state.running = false;
+    state.clock = 90;
     clockEl.textContent = "90'";
     barEl.style.width = "100%";
 
-    // Mostra eventos restantes
+    // Despeja o resto do feed SEM somar gols de novo
     while (state.eventIndex < events.length) {
-      appendEvent(events[state.eventIndex++]);
+      appendEvent(events[state.eventIndex++], { updateScore: false });
     }
+
+    // Placar final sempre do snapshot sealed (motor), nunca da contagem da UI
+    applySealedScore();
 
     footMsg.textContent = live.footer || "Fim de jogo · abra o pós-jogo ao fechar";
     closeBtn.textContent = "Ver pós-jogo";
