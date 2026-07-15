@@ -139,7 +139,7 @@ export function viewHome(game, s) {
       <h3>Últimas crônicas</h3>
       ${(s.chronicles || [])
         .slice(0, 3)
-        .map((c) => `<div class="msg ${c.type}">D${c.day} ${String(c.hour).padStart(2, "0")}h — ${c.text}</div>`)
+        .map((c) => `<div class="msg ${c.type}">Dia ${c.day} · ${String(c.hour).padStart(2, "0")}h — ${c.text}</div>`)
         .join("") || `<div class="empty">A história de ${s.club.name} começa agora.</div>`}
     </div>`;
 }

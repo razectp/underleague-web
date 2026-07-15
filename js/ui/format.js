@@ -38,10 +38,10 @@ export function gameClockParts(state, now = Date.now()) {
   return { day, hour, minute, season };
 }
 
-/** Ex.: D12 · 14:37 · T1 */
+/** Ex.: Dia 12 · 14:37 · Temporada 1 */
 export function timeStr(s, now = Date.now()) {
   const { day, hour, minute, season } = gameClockParts(s, now);
   const h = String(hour).padStart(2, "0");
   const m = String(minute).padStart(2, "0");
-  return `D${day} · ${h}:${m} · T${season}`;
+  return `Dia ${day} · ${h}:${m} · Temporada ${season}`;
 }

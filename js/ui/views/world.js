@@ -218,7 +218,7 @@ export function viewLog(_game, s) {
   const items = (s.chronicles || [])
     .map(
       (c) =>
-        `<div class="msg ${c.type}">D${c.day} ${String(c.hour).padStart(2, "0")}h — ${c.text}</div>`
+        `<div class="msg ${c.type}">Dia ${c.day} · ${String(c.hour).padStart(2, "0")}h — ${c.text}</div>`
     )
     .join("");
 
@@ -226,7 +226,7 @@ export function viewLog(_game, s) {
     .slice(0, 12)
     .map(
       (e) =>
-        `<div class="feed-item"><time>D${e.day}</time>${e.text}</div>`
+        `<div class="feed-item"><time>Dia ${e.day}</time>${e.text}</div>`
     )
     .join("");
   const rivalCards = (s.npcs || [])

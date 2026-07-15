@@ -75,14 +75,14 @@ export function refreshChrome(game) {
       <dt>Missões</dt><dd>${missionReady ? `<span class="badge ok">${missionReady} pronta(s)</span>` : `<span class="badge muted">—</span>`}</dd>
       <dt>Status</dt><dd>${s.boss.injury ? `<span class="badge bad">Indisposto</span>` : `<span class="badge ok">Apto</span>`}</dd>
     </dl>
-    <p class="micro-help" style="margin-top:0.55rem">Passe o mouse nos números do topo para ver o que cada um significa.</p>`;
+    <p class="micro-help" style="margin-top:0.55rem">Topo: Bolso, Energia, Prestígio, Tempo do clube e Disposição.</p>`;
 
   $("#rail-feed").innerHTML =
     (s.feed || [])
       .slice(0, 12)
       .map(
         (f) =>
-          `<div class="feed-item"><time>D${f.day} ${String(f.hour).padStart(2, "0")}h</time>${escapeHtml(f.text)}</div>`
+          `<div class="feed-item"><time>Dia ${f.day} · ${String(f.hour).padStart(2, "0")}h</time>${escapeHtml(f.text)}</div>`
       )
       .join("") || `<div class="empty">Sem eventos ainda.</div>`;
 }

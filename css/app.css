@@ -151,19 +151,34 @@
 
 .pill {
   font-family: var(--mono);
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   padding: 0.32rem 0.65rem;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   flex: 0 0 auto;
   white-space: nowrap;
 }
 
-.pill-k,
+.pill-k {
+  color: var(--dim);
+  line-height: 1;
+}
+
+.pill-label {
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pill-label::after {
+  content: ":";
+  margin-right: 0.1rem;
+}
+
 .pill-max {
   color: var(--dim);
 }
@@ -1238,10 +1253,12 @@ button.linkish:hover strong {
     height: 44px;
     flex-basis: 44px;
   }
-  .top-actions .btn { width: 44px; min-width: 44px; min-height: 44px; padding: 0.45rem; font-size: 0; }
-  .top-actions .btn::before { font-size: 1rem; }
-  #btn-lobby::before { content: "⌂"; }
-  #btn-sync-state::before { content: "☁"; }
+  .top-actions .btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.72rem;
+  }
   .circuit-card { grid-template-columns: 2rem 1fr; }
   .circuit-action { grid-column: 2; text-align: left; }
   .match-score { gap: 0.45rem; padding: 0.75rem 0.25rem; }
