@@ -3,8 +3,19 @@
 import { TRAININGS, OPERATIONS } from "../../config/constants.js";
 import { riskLabel } from "../../core/utils.js";
 import { skillBar, ensureBossSkillXp } from "../../systems/skillProgress.js";
-import { statBar } from "../format.js";
+import {
+  cooldownRemainingMs,
+  formatCountdownHMS,
+  statBar
+} from "../format.js";
 import { playerNameHtml } from "../text.js";
+
+function cdLabel(game, key) {
+  const ms = cooldownRemainingMs(game.state, key);
+  if (ms <= 0) return "";
+  const until = Date.now() + ms;
+  return `<span class="micro-help"> · <strong data-countdown-until="${until}" data-countdown-prefix="CD" data-countdown-done="pronto">CD ${formatCountdownHMS(ms)}</strong></span>`;
+}
 
 function skillProgressHtml(statKey, level, skillXp) {
   const xp = (skillXp && skillXp[statKey]) || 0;
@@ -30,7 +41,7 @@ export function viewTrain(game, s) {
             <span>⚡ ${t.costE}</span>
             <span>R$ ${t.costM}</span>
             <span>${t.stat}: <strong>${val}</strong></span>
-            ${cd ? `<span>CD ${cd}h</span>` : ""}
+            ${cd ? `<span>CD</span>${cdLabel(game, "train_" + t.id)}` : ""}
           </div>
           ${skillProgressHtml(t.stat, val, skillXp)}
         </div>
@@ -76,13 +87,20 @@ export function viewTrain(game, s) {
         <button class="btn btn-gold btn-sm" id="btn-squad-train" ${game.cooldownLeft("squad_train") ? "disabled" : ""}>Treinar jogador</button>
       </div>
       <p style="color:var(--dim);font-size:0.82rem;font-family:var(--mono)">
-        Próximo treino de elenco em ${game.cooldownLeft("squad_train") || 0}h · liderança alta estimula o grupo no dia a dia.
+        ${
+          game.cooldownLeft("squad_train")
+            ? `Próximo treino de elenco: <strong data-countdown-until="${Date.now() + cooldownRemainingMs(game.state, "squad_train")}" data-countdown-prefix="em" data-countdown-done="disponível">em ${formatCountdownHMS(cooldownRemainingMs(game.state, "squad_train"))}</strong>`
+            : "Treino de elenco disponível"
+        }
+        · liderança alta estimula o grupo no dia a dia.
       </p>
     </div>`;
 }
 
 export function viewRest(game, s) {
   const cd = game.cooldownLeft("rest");
+  const restMs = cooldownRemainingMs(s, "rest");
+  const restUntil = Date.now() + restMs;
   return `
     <h1 class="view-title">Descanso</h1>
     <p class="view-sub">Sem disposição o clube para. Durma, recupere e volte à rotina.</p>
@@ -99,7 +117,11 @@ export function viewRest(game, s) {
       ${statBar("Energia atual", s.boss.energy, s.boss.maxEnergy)}
       ${statBar("Saúde", s.boss.health, 100, s.boss.health < 40 ? "red" : "")}
       <p style="color:var(--muted);font-size:0.88rem;margin:0.5rem 0 0.8rem">
-        Pode descansar de novo em: <strong>${cd}h</strong>
+        ${
+          cd
+            ? `Pode descansar de novo em: <strong data-countdown-until="${restUntil}" data-countdown-prefix="" data-countdown-done="agora">${formatCountdownHMS(restMs)}</strong>`
+            : "Descanso disponível agora."
+        }
         ${s.boss.injury ? ` · Lesão ativa: ${s.boss.injury.name}` : ""}
       </p>
       <div class="action-list">
@@ -139,7 +161,7 @@ export function viewOps(game) {
             ${op.minNeg ? `<span>NEG≥${op.minNeg}</span>` : ""}
             ${op.minLead ? `<span>LID≥${op.minLead}</span>` : ""}
             ${op.minCond ? `<span>CON≥${op.minCond}</span>` : ""}
-            ${cd ? `<span>CD ${cd}h</span>` : ""}
+            ${cd ? `<span>CD</span>${cdLabel(game, "op_" + op.id)}` : ""}
           </div>
         </div>
         <button class="btn btn-primary btn-sm" data-op="${op.id}" ${cd ? "disabled" : ""}>Executar</button>

@@ -1,7 +1,11 @@
 import { PRACAS, MATCH_ENERGY_COST, CIRCUIT_ENERGY_COST } from "../../config/constants.js";
 import { formatMoney } from "../../core/utils.js";
-import { missionDestination, missionGoAttrs } from "../../systems/missions.js";
-import { statBar, timeStr } from "../format.js";
+import {
+  missionDestination,
+  missionGoAttrs,
+  missionWaitInfo
+} from "../../systems/missions.js";
+import { formatCountdownHMS, statBar, timeStr } from "../format.js";
 import { suggestNextAction, GLOSSARY } from "../guidance.js";
 
 export function viewHome(game, s) {
@@ -16,22 +20,38 @@ export function viewHome(game, s) {
   }
 
   const { items, done, total, claimed } = game.missionsSummary();
+  const now = Date.now();
   const missionPreview = items
     .map((m) => {
       const complete = m.progress >= m.target;
-      const tag = m.claimed ? "✓" : complete ? "★ pronta" : `${m.progress}/${m.target}`;
+      const wait = missionWaitInfo(game, m, now);
+      const tag = m.claimed
+        ? "✓"
+        : complete
+          ? "★ pronta"
+          : wait
+            ? "espera"
+            : `${m.progress}/${m.target}`;
       const reward = `R$ ${formatMoney(m.prize)}${m.energy ? ` · +${m.energy}⚡` : ""}`;
       let btn = "";
       if (m.claimed) {
         btn = "";
       } else if (complete) {
         btn = `<button type="button" class="btn btn-gold btn-sm" data-claim="${m.id}">Resgatar</button>`;
+      } else if (wait) {
+        btn = `<button type="button" class="btn btn-ghost btn-sm" ${missionGoAttrs(m.type)}>Ver</button>`;
       } else {
         btn = `<button type="button" class="btn btn-primary btn-sm" ${missionGoAttrs(m.type)} title="${missionDestination(m.type).label}">Ir →</button>`;
       }
+      const waitLine = wait
+        ? `<p class="mission-wait" style="margin:0.25rem 0 0;font-size:0.78rem;color:var(--muted)">
+            <strong data-countdown-until="${wait.until}" data-countdown-prefix="volte em" data-countdown-done="disponível agora">volte em ${formatCountdownHMS(wait.remainingMs)}</strong>
+          </p>`
+        : "";
       return `<div class="action-card action-card-compact">
         <div><h4 style="font-size:0.92rem;margin:0">${m.label} <span class="badge ${m.claimed ? "muted" : complete ? "ok" : "warn"}">${tag}</span></h4>
-        <p style="margin:0.2rem 0 0;font-size:0.82rem;color:var(--muted)">${reward}</p></div>
+        <p style="margin:0.2rem 0 0;font-size:0.82rem;color:var(--muted)">${reward}</p>
+        ${waitLine}</div>
         ${btn}
       </div>`;
     })

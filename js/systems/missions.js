@@ -4,6 +4,12 @@
  */
 
 import { clamp, formatMoney } from "../core/utils.js";
+import { TRAININGS, OPERATIONS } from "../config/constants.js";
+import {
+  cooldownRemainingMs,
+  msUntilNextGameDay,
+  formatCountdownHMS
+} from "../ui/format.js";
 
 /**
  * Conjunto fixo de todo dia.
@@ -108,6 +114,83 @@ export function missionGoAttrs(type) {
   const d = missionDestination(type);
   const tab = d.competeTab ? ` data-compete-tab="${d.competeTab}"` : "";
   return `data-go="${d.view}"${tab}`;
+}
+
+function minCooldownMs(state, keys, now) {
+  let best = Infinity;
+  for (const key of keys) {
+    const ms = cooldownRemainingMs(state, key, now);
+    if (ms > 0 && ms < best) best = ms;
+  }
+  return best === Infinity ? 0 : best;
+}
+
+/**
+ * Bloqueio por tempo (cooldown / próxima rodada) para uma tarefa incompleta.
+ * @returns {null | { kind: string, label: string, remainingMs: number, until: number, text: string }}
+ */
+export function missionWaitInfo(game, mission, now = Date.now()) {
+  if (!game?.state || !mission) return null;
+  if (mission.claimed || mission.progress >= mission.target) return null;
+
+  const s = game.state;
+  let remainingMs = 0;
+  let label = "";
+
+  switch (mission.type) {
+    case "match": {
+      if (s.boss?.lastMatchDay === s.day) {
+        remainingMs = msUntilNextGameDay(s, now);
+        label = "Tempo até a próxima partida da liga";
+      }
+      break;
+    }
+    case "circuit": {
+      remainingMs = cooldownRemainingMs(s, "circuit", now);
+      label = "Circuito em recuperação";
+      break;
+    }
+    case "rest": {
+      remainingMs = cooldownRemainingMs(s, "rest", now);
+      label = "Descanso em cooldown";
+      break;
+    }
+    case "squad_train": {
+      remainingMs = cooldownRemainingMs(s, "squad_train", now);
+      label = "Treino do elenco em cooldown";
+      break;
+    }
+    case "train": {
+      const keys = TRAININGS.map((t) => `train_${t.id}`);
+      const anyFree = keys.some((k) => cooldownRemainingMs(s, k, now) <= 0);
+      if (!anyFree) {
+        remainingMs = minCooldownMs(s, keys, now);
+        label = "Treinos pessoais em cooldown";
+      }
+      break;
+    }
+    case "operation": {
+      const keys = OPERATIONS.map((op) => `op_${op.id}`);
+      const anyFree = keys.some((k) => cooldownRemainingMs(s, k, now) <= 0);
+      if (!anyFree) {
+        remainingMs = minCooldownMs(s, keys, now);
+        label = "Operações em cooldown";
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  if (!(remainingMs > 1000)) return null;
+  const until = now + remainingMs;
+  return {
+    kind: mission.type,
+    label,
+    remainingMs,
+    until,
+    text: `${label} · volte em ${formatCountdownHMS(remainingMs)}`
+  };
 }
 
 function buildFixedMissions() {

@@ -1452,6 +1452,15 @@ button.linkish:hover strong {
 .action-card-compact h4 {
   font-weight: 600;
 }
+.mission-wait .mission-countdown,
+.mission-countdown,
+[data-countdown-until] {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--mono, ui-monospace, monospace);
+}
+.countdown-ready {
+  color: var(--green, #3ecf6a);
+}
 
 /* Painel de operações (sem rota /admin) */
 .ops-wrap {

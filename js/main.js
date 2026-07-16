@@ -9,7 +9,7 @@ import { game } from "./game/Game.js";
 import { createApp } from "./ui/App.js";
 import { $, toast } from "./ui/dom.js";
 import { refreshChrome } from "./ui/chrome.js";
-import { timeStr } from "./ui/format.js";
+import { timeStr, tickCountdownNodes } from "./ui/format.js";
 import { api, setToken, getToken, probeServer } from "./net/api.js";
 import { enableServerAuthority } from "./net/serverAuthority.js";
 import { managerName } from "./data/generators.js";
@@ -471,9 +471,12 @@ function tickGameClock() {
   if (!$("#screen-game")?.classList.contains("active")) return;
   if (!game.state) return;
   const el = $("#top-day");
-  if (!el) return;
-  const next = timeStr(game.state);
-  if (el.textContent !== next) el.textContent = next;
+  if (el) {
+    const next = timeStr(game.state);
+    if (el.textContent !== next) el.textContent = next;
+  }
+  // Cooldowns de tarefas / UI (HH:MM:SS)
+  tickCountdownNodes(document.getElementById("main-content") || document);
 }
 
 function init() {
