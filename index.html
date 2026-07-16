@@ -59,7 +59,8 @@
               </div>
               <div id="account-session" class="hidden">
                 <p id="account-status" class="portal-status" role="status"></p>
-                <button class="btn btn-ghost btn-block" id="btn-logout" type="button">Sair / trocar conta</button>
+                <button class="btn btn-primary btn-block hidden" id="btn-open-ops" type="button" hidden>Painel de operações</button>
+                <button class="btn btn-ghost btn-block" id="btn-logout" type="button" style="margin-top:0.45rem">Sair / trocar conta</button>
               </div>
             </div>
 
@@ -160,6 +161,24 @@
         <footer class="boot-foot portal-foot" id="portal-foot">
           Under League · progresso salvo na conta online
         </footer>
+      </div>
+    </section>
+
+    <!-- Painel de operações (só após login isAdmin — sem rota /admin) -->
+    <section id="screen-ops" class="screen" aria-label="Operações">
+      <div class="boot-wrap ops-wrap">
+        <header class="boot-hero portal-hero">
+          <p class="eyebrow">Manutenção</p>
+          <h1>Operações</h1>
+          <p class="lede">Ferramentas internas. Não há página pública — só conta autorizada.</p>
+        </header>
+        <div class="ops-toolbar btn-row" style="margin-bottom:1rem;gap:0.5rem;flex-wrap:wrap">
+          <button type="button" class="btn btn-secondary" id="btn-ops-back">← Voltar ao portal</button>
+          <button type="button" class="btn btn-ghost" id="btn-ops-logout">Sair</button>
+        </div>
+        <div id="ops-panel-root">
+          <p class="empty">Aguardando…</p>
+        </div>
       </div>
     </section>
 

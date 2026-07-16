@@ -27,7 +27,7 @@ function closeModal(root, { restoreFocus = true } = {}) {
   modalReturnFocus = null;
 }
 
-export function modal({ title, body, confirmText, onConfirm, danger }) {
+export function modal({ title, body, confirmText, onConfirm, onCancel, danger }) {
   const root = $("#modal-root");
   modalReturnFocus = document.activeElement;
   const titleId = `modal-title-${Date.now()}`;
@@ -37,7 +37,7 @@ export function modal({ title, body, confirmText, onConfirm, danger }) {
   root.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="${titleId}" tabindex="-1">
       <h3 id="${titleId}">${title}</h3>
-      <p>${body}</p>
+      <div class="modal-body">${body}</div>
       <div class="btn-row">
         <button class="btn btn-ghost" data-x>Cancelar</button>
         <button class="btn ${danger ? "btn-danger" : "btn-primary"}" data-ok>${confirmText || "OK"}</button>
@@ -46,18 +46,23 @@ export function modal({ title, body, confirmText, onConfirm, danger }) {
   const dialog = root.querySelector(".modal");
   const cancel = root.querySelector("[data-x]");
   const confirm = root.querySelector("[data-ok]");
-  cancel.onclick = () => closeModal(root);
-  confirm.onclick = () => {
+  const dismiss = (cancelled) => {
     closeModal(root);
+    if (cancelled && onCancel) onCancel();
+  };
+  cancel.onclick = () => dismiss(true);
+  confirm.onclick = () => {
+    // onConfirm roda com o DOM ainda aberto (ex.: ler input de confirmação)
     if (onConfirm) onConfirm();
+    closeModal(root);
   };
   root.onclick = (e) => {
-    if (e.target === root) closeModal(root);
+    if (e.target === root) dismiss(true);
   };
   root.onkeydown = (e) => {
     if (e.key === "Escape") {
       e.preventDefault();
-      closeModal(root);
+      dismiss(true);
       return;
     }
     if (e.key !== "Tab") return;

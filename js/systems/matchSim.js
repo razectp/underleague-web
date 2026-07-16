@@ -3,8 +3,8 @@
  *
  * Probabilidades calibradas para futebol real (médias aproximadas):
  * - ~2,4–2,9 gols/jogo no total
- * - ~3–4 amarelos/jogo
- * - ~0,15–0,35 vermelhos/jogo (muitos jogos SEM vermelho)
+ * - ~1,5–2,5 amarelos/jogo (muitos jogos com 1–2; poucos “festa de cartão”)
+ * - ~0,10–0,25 expulsões/jogo (maioria dos jogos SEM vermelho)
  * - ~0,20–0,35 pênaltis/jogo (maioria dos jogos SEM pênalti)
  * - lesão grave rara
  *
@@ -75,6 +75,18 @@ function attackers(side) {
 function defenders(side) {
   const pool = onField(side).filter((p) => ["ZAG", "VOL", "LAT", "GOL"].includes(p.pos));
   return pool.length ? pool : onField(side);
+}
+
+/**
+ * Quem leva cartão/falta: qualquer um em campo (exceto goleiro na maioria dos casos),
+ * com leve viés para linha defensiva — evita concentrar 2º amarelo sempre no mesmo ZAG.
+ */
+function pickFouler(side, { allowKeeper = false } = {}) {
+  const field = onField(side).filter((p) => allowKeeper || p.pos !== "GOL");
+  if (!field.length) return onField(side)[0] || null;
+  const defensive = field.filter((p) => ["ZAG", "VOL", "LAT"].includes(p.pos));
+  if (defensive.length && chance(58)) return pick(defensive);
+  return pick(field);
 }
 
 function keeper(side) {
@@ -251,10 +263,11 @@ export function rollMatchBudget(homeMentality, awayMentality) {
     woodwork: poisson(0.35),
     corners: poisson(9.5),
     cornerGoals: 0, // derivado
-    yellows: poisson(3.4),
-    /** vermelho direto (muito raro) */
-    directReds: poisson(0.12),
-    /** faltas “de cartão” extras sem amarelo */
+    /** amarelos orçados: Poisson ~1.7 → o mais comum é 1–2 cartões no jogo */
+    yellows: poisson(1.7),
+    /** vermelho direto (raro; maioria dos jogos = 0) */
+    directReds: poisson(0.05),
+    /** faltas “narradas” — quase nunca viram amarelo extra (orçamento separado) */
     fouls: poisson(8),
     /** pênaltis (maioria dos jogos = 0) */
     penalties: poisson(0.28),
@@ -494,7 +507,7 @@ export function simulateMatchNarrative({
         addOpenGoal(att, min);
         break;
       case "yellow": {
-        const fouler = pick(defenders(def));
+        const fouler = pickFouler(def);
         const victim = pick(attackers(att));
         if (!fouler) break;
         push(events, {
@@ -508,7 +521,7 @@ export function simulateMatchNarrative({
         break;
       }
       case "direct_red": {
-        const fouler = pick(defenders(def));
+        const fouler = pickFouler(def);
         if (!fouler || def.sentOff.has(fouler.id)) break;
         push(events, {
           min,
@@ -518,11 +531,11 @@ export function simulateMatchNarrative({
           text: `Entrada dura de ${fouler.name}!`
         });
         sendOff(def, fouler, min, events, "direct_red");
-        if (chance(35)) takePenalty(att, def, min, "derrubada na área");
+        if (chance(28)) takePenalty(att, def, min, "derrubada na área");
         break;
       }
       case "foul": {
-        const fouler = pick(defenders(def));
+        const fouler = pickFouler(def);
         const victim = pick(attackers(att));
         if (!fouler) break;
         push(events, {
@@ -531,15 +544,15 @@ export function simulateMatchNarrative({
           side: def.key,
           text: `Falta de ${fouler.name}${victim ? ` em ${victim.name}` : ""}`
         });
-        // ~25% das faltas “mostradas” viram amarelo (já temos yellows orçados à parte)
-        if (chance(12)) applyYellowCard(def, fouler, min, events);
+        // poucas faltas “mostradas” viram amarelo — o grosso já vem do orçamento
+        if (chance(4)) applyYellowCard(def, fouler, min, events);
         break;
       }
       case "penalty":
         takePenalty(att, def, min, "falta na área");
         break;
       case "handball": {
-        const culprit = pick(defenders(def).filter((p) => p.pos !== "GOL"));
+        const culprit = pickFouler(def);
         if (!culprit) break;
         push(events, {
           min,
@@ -547,8 +560,8 @@ export function simulateMatchNarrative({
           side: def.key,
           text: `Mão de ${culprit.name}`
         });
-        if (chance(40)) applyYellowCard(def, culprit, min, events);
-        if (chance(50)) takePenalty(att, def, min, "mão na área");
+        if (chance(12)) applyYellowCard(def, culprit, min, events);
+        if (chance(45)) takePenalty(att, def, min, "mão na área");
         break;
       }
       case "offside": {

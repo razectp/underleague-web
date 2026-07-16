@@ -1443,3 +1443,34 @@ button.linkish:hover strong {
   .live-score { font-size: 1.5rem; }
   .live-match-head { flex-direction: column; }
 }
+
+/* Painel de operações (sem rota /admin) */
+.ops-wrap {
+  max-width: 1100px;
+}
+.ops-grid {
+  display: grid;
+  gap: 1rem;
+}
+.ops-table {
+  width: 100%;
+  font-size: 0.86rem;
+}
+.ops-table th,
+.ops-table td {
+  padding: 0.45rem 0.4rem;
+  vertical-align: top;
+  text-align: left;
+}
+.ops-table .num {
+  white-space: nowrap;
+}
+.modal-body {
+  margin: 0 0 0.85rem;
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.modal-body p {
+  margin: 0 0 0.5rem;
+}

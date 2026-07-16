@@ -112,7 +112,24 @@ export const api = {
     request("/api/arena/cancel", { method: "POST", body: { challengeId } }),
   feed: () => request("/api/arena/feed", { auth: false }),
   rankings: () => request("/api/rankings", { auth: false }),
-  lobby: () => request("/api/lobby", { auth: false })
+  lobby: () => request("/api/lobby", { auth: false }),
+
+  /** Painel de operações (somente conta ops no servidor). */
+  opsOverview: () => request("/api/ops/overview"),
+  opsResetProgress: (confirm) =>
+    request("/api/ops/reset-progress", { method: "POST", body: { confirm } }),
+  opsClearArena: (confirm) =>
+    request("/api/ops/clear-arena", { method: "POST", body: { confirm } }),
+  opsPurgeSessions: (confirm, keepSelf = true) =>
+    request("/api/ops/purge-sessions", {
+      method: "POST",
+      body: { confirm, keepSelf }
+    }),
+  opsWipeUser: (userId, mode, confirm) =>
+    request("/api/ops/wipe-user", {
+      method: "POST",
+      body: { userId, mode, confirm }
+    })
 };
 
 /**

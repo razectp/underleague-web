@@ -46,10 +46,20 @@ function setCampaignAccess({ connected = false, hasGame = false } = {}) {
 
 function setAccountUi(user, { created = false } = {}) {
   const connected = !!user;
+  const isAdmin = !!(user && user.isAdmin);
   $("#account-auth-form")?.classList.toggle("hidden", connected);
   $("#account-session")?.classList.toggle("hidden", !connected);
-  setCampaignAccess({ connected, hasGame: false });
-  if (connected && user.clubName) {
+  const opsBtn = $("#btn-open-ops");
+  if (opsBtn) {
+    opsBtn.classList.toggle("hidden", !isAdmin);
+    opsBtn.hidden = !isAdmin;
+  }
+  setCampaignAccess({ connected: connected && !isAdmin, hasGame: false });
+  if (connected && isAdmin) {
+    $("#panel-create")?.classList.add("hidden");
+    const start = $("#btn-start");
+    if (start) start.disabled = true;
+  } else if (connected && user.clubName) {
     $("#panel-create")?.classList.add("hidden");
     const start = $("#btn-start");
     if (start) start.disabled = true;
@@ -59,19 +69,25 @@ function setAccountUi(user, { created = false } = {}) {
   if (title) title.textContent = connected ? "Conta conectada" : "Entrar no jogo";
   if (hint) {
     hint.textContent = connected
-      ? "Sua sessão está ativa. Continue para o clube ou troque de conta."
+      ? isAdmin
+        ? "Sessão de operações ativa. Abra o painel ou saia da conta."
+        : "Sua sessão está ativa. Continue para o clube ou troque de conta."
       : "Cadastre-se apenas com e-mail e senha. O clube é criado depois.";
   }
   const status = $("#account-status");
   const apiStatus = $("#account-api-status");
   if (apiStatus) {
     apiStatus.textContent = connected
-      ? "Seu progresso está atualizado."
+      ? isAdmin
+        ? "Acesso de operações liberado."
+        : "Seu progresso está atualizado."
       : "Entre para continuar sua jornada.";
   }
   if (!status) return;
   if (!connected) {
     status.textContent = "";
+  } else if (isAdmin) {
+    status.textContent = `Operador: ${user.displayName}`;
   } else if (created) {
     status.textContent = `Conta criada: ${user.displayName} · agora funde seu clube`;
   } else {
@@ -115,6 +131,12 @@ async function doLogin(user, pass, { autoEnter = true } = {}) {
   setToken(r.token);
   setAccountUi(r.user);
   toast(`Bem-vindo, ${r.user.displayName}!`, "info");
+
+  if (r.user?.isAdmin) {
+    toast("Acesso de operações concedido.", "info");
+    await app.showOps();
+    return true;
+  }
 
   if (autoEnter) {
     const loaded = await loadServerState();
@@ -264,6 +286,18 @@ function bindGlobal() {
     );
   });
 
+  $("#btn-open-ops")?.addEventListener("click", async () => {
+    await app.showOps();
+  });
+
+  $("#btn-ops-back")?.addEventListener("click", () => {
+    app.showBoot();
+  });
+
+  $("#btn-ops-logout")?.addEventListener("click", () => {
+    $("#btn-logout")?.click();
+  });
+
   $("#btn-login")?.addEventListener("click", async () => {
     const email = $("#input-email").value.trim();
     const password = $("#input-password").value;
@@ -410,7 +444,15 @@ async function checkServer({ quiet = false } = {}) {
       const me = await api.me();
       if (me.ok) {
         setAccountUi(me.user);
-        await loadServerState();
+        if (me.user?.isAdmin) {
+          if ($("#screen-ops")?.classList.contains("active")) {
+            /* já no painel */
+          } else if (!$("#screen-boot")?.classList.contains("active")) {
+            await app.showOps();
+          }
+        } else {
+          await loadServerState();
+        }
       } else {
         setToken(null);
         setAccountUi(null);

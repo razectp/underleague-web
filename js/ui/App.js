@@ -8,6 +8,7 @@ import { VIEWS } from "./views/index.js";
 import { bindViewEvents } from "./bindEvents.js";
 import { loadOnlineData } from "./views/online.js";
 import { refreshLobby } from "./lobby.js";
+import { renderOpsPanel } from "./opsPanel.js";
 import {
   COMPETE_VIEW_ALIASES,
   getCompeteTab,
@@ -143,8 +144,9 @@ export function createApp(game) {
     },
 
     showBoot() {
-      $("#screen-boot").classList.add("active");
-      $("#screen-game").classList.remove("active");
+      $("#screen-boot")?.classList.add("active");
+      $("#screen-game")?.classList.remove("active");
+      $("#screen-ops")?.classList.remove("active");
       closeMobileNav();
       document.title = "Under League — Portal";
       history.replaceState({}, "", `${location.pathname}${location.search}`);
@@ -160,10 +162,30 @@ export function createApp(game) {
     },
 
     showGame() {
-      $("#screen-boot").classList.remove("active");
-      $("#screen-game").classList.add("active");
+      $("#screen-boot")?.classList.remove("active");
+      $("#screen-ops")?.classList.remove("active");
+      $("#screen-game")?.classList.add("active");
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       return this.setView("home", { history: "replace" });
+    },
+
+    /** Painel de operações — sem hash/rota pública. */
+    async showOps() {
+      $("#screen-boot")?.classList.remove("active");
+      $("#screen-game")?.classList.remove("active");
+      $("#screen-ops")?.classList.add("active");
+      closeMobileNav();
+      document.title = "Under League — Operações";
+      history.replaceState({}, "", `${location.pathname}${location.search}`);
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      await renderOpsPanel();
+      requestAnimationFrame(() => {
+        const heading = $("#screen-ops h1");
+        if (heading) {
+          heading.tabIndex = -1;
+          heading.focus({ preventScroll: true });
+        }
+      });
     },
 
     toast
