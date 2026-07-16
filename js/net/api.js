@@ -116,20 +116,53 @@ export const api = {
 
   /** Painel de operações (somente conta ops no servidor). */
   opsOverview: () => request("/api/ops/overview"),
+  opsInspectUser: (userId) => request(`/api/ops/user/${encodeURIComponent(userId)}`),
+  opsAudit: (limit = 40) => request(`/api/ops/audit?limit=${limit}`),
   opsResetProgress: (confirm) =>
     request("/api/ops/reset-progress", { method: "POST", body: { confirm } }),
   opsClearArena: (confirm) =>
     request("/api/ops/clear-arena", { method: "POST", body: { confirm } }),
+  opsClearChallenges: (confirm) =>
+    request("/api/ops/clear-challenges", { method: "POST", body: { confirm } }),
+  opsClearFeed: (confirm) =>
+    request("/api/ops/clear-feed", { method: "POST", body: { confirm } }),
   opsPurgeSessions: (confirm, keepSelf = true) =>
     request("/api/ops/purge-sessions", {
       method: "POST",
       body: { confirm, keepSelf }
     }),
+  opsKickUser: (userId, confirm) =>
+    request("/api/ops/kick-user", { method: "POST", body: { userId, confirm } }),
   opsWipeUser: (userId, mode, confirm) =>
     request("/api/ops/wipe-user", {
       method: "POST",
       body: { userId, mode, confirm }
-    })
+    }),
+  opsBanUser: (userId, reason, confirm) =>
+    request("/api/ops/ban-user", {
+      method: "POST",
+      body: { userId, reason, confirm }
+    }),
+  opsUnbanUser: (userId, confirm) =>
+    request("/api/ops/unban-user", { method: "POST", body: { userId, confirm } }),
+  opsSetPassword: (userId, password, confirm) =>
+    request("/api/ops/set-password", {
+      method: "POST",
+      body: { userId, password, confirm }
+    }),
+  opsGrant: (payload) =>
+    request("/api/ops/grant", { method: "POST", body: payload }),
+  opsHeal: (userId, confirm) =>
+    request("/api/ops/heal", { method: "POST", body: { userId, confirm } }),
+  opsAdvanceDay: (payload) =>
+    request("/api/ops/advance-day", { method: "POST", body: payload }),
+  opsPurgeInactive: (days, confirm) =>
+    request("/api/ops/purge-inactive", {
+      method: "POST",
+      body: { days, confirm }
+    }),
+  opsBroadcast: (payload) =>
+    request("/api/ops/broadcast", { method: "POST", body: payload })
 };
 
 /**

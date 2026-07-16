@@ -114,6 +114,16 @@ export async function refreshLobby(game) {
       feedEl.innerHTML = items || `<p class="empty">Sem confrontos PvP ainda.</p>`;
     }
 
+    const newsElBroadcast = $("#lobby-news");
+    if (newsElBroadcast && data.broadcast?.message) {
+      const existing = newsElBroadcast.querySelector(".msg.ops-broadcast");
+      const html = `<div class="msg warn ops-broadcast"><strong>Aviso da liga</strong> · ${esc(data.broadcast.message)}</div>`;
+      if (existing) existing.outerHTML = html;
+      else newsElBroadcast.insertAdjacentHTML("afterbegin", html);
+    } else if (newsElBroadcast) {
+      newsElBroadcast.querySelector(".msg.ops-broadcast")?.remove();
+    }
+
     return data;
   } catch {
     setDemoUi(false);
