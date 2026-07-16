@@ -77,5 +77,15 @@ export function viewStatus(_game, s) {
         <strong>Liderança</strong> com a torcida e o vestiário ·
         <strong>Condicionamento</strong> na resistência a lesões.
       </p>
+      <div class="btn-row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.4rem">
+        <button type="button" class="btn btn-primary btn-sm" data-go="train">Ir treinar →</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-go="ops">Operações</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-go="rest">Descansar</button>
+        ${
+          b.injury || b.health < 50
+            ? `<button type="button" class="btn btn-secondary btn-sm" data-go="hospital">Médico →</button>`
+            : ""
+        }
+      </div>
     </div>`;
 }

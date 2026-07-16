@@ -207,10 +207,20 @@ export function viewHospital(_game, s) {
             </div>`
           : `<div class="empty">Você está bem para a rotina do clube.</div>`
       }
+      ${
+        !s.boss.injury && s.boss.health < 70
+          ? `<div class="btn-row" style="margin-top:0.55rem"><button type="button" class="btn btn-secondary btn-sm" data-go="rest">Ir descansar →</button></div>`
+          : ""
+      }
     </div>
     <div class="panel">
       <h3>Elenco lesionado <span class="tag">${injured.length}</span></h3>
       <div class="action-list">${list || `<div class="empty">Ninguém no departamento médico.</div>`}</div>
+      ${
+        injured.length
+          ? `<div class="btn-row" style="margin-top:0.65rem"><button type="button" class="btn btn-secondary btn-sm" data-go="lineup">Ver escalação →</button></div>`
+          : `<div class="btn-row" style="margin-top:0.65rem"><button type="button" class="btn btn-secondary btn-sm" data-go="squad">Ver elenco →</button></div>`
+      }
     </div>`;
 }
 

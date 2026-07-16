@@ -1,4 +1,5 @@
 import { formatMoney } from "../../core/utils.js";
+import { missionDestination, missionGoAttrs } from "../../systems/missions.js";
 
 function rewardLine(m) {
   const bits = [`R$ ${formatMoney(m.prize)}`];
@@ -19,11 +20,15 @@ export function viewMissions(game) {
       else if (complete) status = `<span class="badge ok">Pronta</span>`;
       else status = `<span class="badge warn">${m.progress}/${m.target}</span>`;
 
-      const action = m.claimed
-        ? ""
-        : complete
-          ? `<button type="button" class="btn btn-gold btn-sm" data-claim="${m.id}">Resgatar</button>`
-          : `<button type="button" class="btn btn-ghost btn-sm" disabled>${m.progress}/${m.target}</button>`;
+      const dest = missionDestination(m.type);
+      let action;
+      if (m.claimed) {
+        action = `<span class="micro-help">OK</span>`;
+      } else if (complete) {
+        action = `<button type="button" class="btn btn-gold btn-sm" data-claim="${m.id}">Resgatar</button>`;
+      } else {
+        action = `<button type="button" class="btn btn-primary btn-sm" ${missionGoAttrs(m.type)}>${dest.label} →</button>`;
+      }
 
       return `
         <div class="action-card">
@@ -45,12 +50,23 @@ export function viewMissions(game) {
     `+${fullClear.rep}★`
   ].join(" · ");
 
+  const nextOpen = items.find((m) => !m.claimed && m.progress < m.target);
+  const nextReady = items.find((m) => !m.claimed && m.progress >= m.target);
+  const quickNav = nextReady
+    ? `<button type="button" class="btn btn-gold btn-sm" data-claim="${nextReady.id}">Resgatar: ${nextReady.label}</button>`
+    : nextOpen
+      ? `<button type="button" class="btn btn-primary btn-sm" ${missionGoAttrs(nextOpen.type)}>${missionDestination(nextOpen.type).label}: ${nextOpen.label} →</button>`
+      : `<button type="button" class="btn btn-secondary btn-sm" data-go="home">Voltar ao time</button>`;
+
   return `
     <h1 class="view-title">Tarefas do dia</h1>
     <p class="view-sub">
       Dia ${game.state.day} · checklist fixo · ${claimed}/${total} resgatadas · ${done}/${total} completas
     </p>
     <div class="panel">
+      <div class="btn-row" style="margin-bottom:0.75rem;flex-wrap:wrap;gap:0.45rem">
+        ${quickNav}
+      </div>
       <h3>Rotina diária <span class="tag">sempre as mesmas</span></h3>
       <div class="action-list">${cards}</div>
     </div>
@@ -67,6 +83,7 @@ export function viewMissions(game) {
       <p style="color:var(--muted);font-size:0.9rem;line-height:1.45">
         Cada resgate devolve um pouco de dinheiro e energia — o suficiente para manter a rotina
         (treino, descanso e jogos) sem depender de sorte no sorteio de missões.
+        Use <strong>Ir →</strong> para ir direto ao local da tarefa.
       </p>
     </div>`;
 }

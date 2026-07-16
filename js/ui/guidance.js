@@ -4,6 +4,7 @@
  */
 
 import { APPROACHES, CIRCUIT_ENERGY_COST, MATCH_ENERGY_COST } from "../config/constants.js";
+import { missionDestination } from "../systems/missions.js";
 
 /** Glossário curto (hover / primeira leitura) */
 export const GLOSSARY = {
@@ -112,18 +113,14 @@ export function suggestNextAction(game) {
   }
 
   const openMission = missions.items.find((m) => !m.claimed && m.progress < m.target);
-  if (openMission && ["train", "squad_train", "rest", "operation"].includes(openMission.type)) {
-    const viewMap = {
-      train: "train",
-      squad_train: "train",
-      rest: "rest",
-      operation: "ops"
-    };
+  if (openMission) {
+    const dest = missionDestination(openMission.type);
     return {
       id: "mission",
-      title: "Avançar missão do dia",
-      why: openMission.label,
-      view: viewMap[openMission.type] || "missions",
+      title: openMission.label,
+      why: `${openMission.blurb || "Tarefa do dia"} · ${dest.label}.`,
+      view: dest.view,
+      tab: dest.competeTab,
       primary: true
     };
   }

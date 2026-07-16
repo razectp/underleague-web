@@ -64,6 +64,27 @@ export function refreshChrome(game) {
     /* ignore */
   }
 
+  const railActions = [];
+  if (missionReady) {
+    railActions.push(
+      `<button type="button" class="btn btn-gold btn-sm" data-go="missions">Resgatar tarefas (${missionReady})</button>`
+    );
+  } else {
+    railActions.push(
+      `<button type="button" class="btn btn-ghost btn-sm" data-go="missions">Tarefas do dia</button>`
+    );
+  }
+  if (injured || s.boss.injury) {
+    railActions.push(
+      `<button type="button" class="btn btn-secondary btn-sm" data-go="hospital">Médico →</button>`
+    );
+  }
+  if (s.boss.energy < 25) {
+    railActions.push(
+      `<button type="button" class="btn btn-secondary btn-sm" data-go="rest">Descansar →</button>`
+    );
+  }
+
   $("#rail-status").innerHTML = `
     <dl class="kv">
       <dt title="Nível do dirigente">Nível</dt><dd>${s.boss.level}</dd>
@@ -75,6 +96,10 @@ export function refreshChrome(game) {
       <dt>Missões</dt><dd>${missionReady ? `<span class="badge ok">${missionReady} pronta(s)</span>` : `<span class="badge muted">—</span>`}</dd>
       <dt>Status</dt><dd>${s.boss.injury ? `<span class="badge bad">Indisposto</span>` : `<span class="badge ok">Apto</span>`}</dd>
     </dl>
+    <div class="btn-row" style="margin-top:0.65rem;flex-direction:column;align-items:stretch;gap:0.35rem">
+      ${railActions.join("")}
+      <button type="button" class="btn btn-ghost btn-sm" data-go="prematch">Pré-jogo</button>
+    </div>
     <p class="micro-help" style="margin-top:0.55rem">Topo: Bolso, Energia, Prestígio, Tempo do clube e Disposição.</p>`;
 
   $("#rail-feed").innerHTML =

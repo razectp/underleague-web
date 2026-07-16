@@ -162,9 +162,16 @@ export function viewPostMatch(game, s) {
       <div class="btn-row" style="flex-wrap:wrap">
         ${(pm.xi || []).map((p) => `<span class="badge muted">${p.pos} ${playerNameHtml(p)}</span>`).join(" ")}
       </div>
-      <div class="btn-row" style="margin-top:0.75rem">
+      <div class="btn-row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.4rem">
         <button type="button" class="btn btn-secondary btn-sm" data-go="compete" data-compete-tab="liga">Voltar à liga</button>
         <button type="button" class="btn btn-primary btn-sm" data-go="lineup">Escalação</button>
+        ${
+          (pm.injuries && pm.injuries.length) || s.squad.some((p) => p.injury)
+            ? `<button type="button" class="btn btn-secondary btn-sm" data-go="hospital">Ir ao médico →</button>`
+            : ""
+        }
+        <button type="button" class="btn btn-secondary btn-sm" data-go="missions">Tarefas do dia</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-go="rest">Descansar</button>
       </div>
     </div>`;
 }

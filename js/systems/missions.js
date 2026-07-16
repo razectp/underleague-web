@@ -80,6 +80,36 @@ export const DAILY_FULL_CLEAR = {
   label: "Dia completo"
 };
 
+/**
+ * Para onde a UI deve mandar o jogador cumprir a tarefa.
+ * @returns {{ view: string, competeTab?: string, label: string }}
+ */
+export function missionDestination(type) {
+  switch (type) {
+    case "train":
+      return { view: "train", label: "Ir ao treino" };
+    case "squad_train":
+      return { view: "train", label: "Ir ao elenco" };
+    case "rest":
+      return { view: "rest", label: "Ir descansar" };
+    case "circuit":
+      return { view: "compete", competeTab: "circuito", label: "Ir ao circuito" };
+    case "match":
+      return { view: "prematch", label: "Ir ao pré-jogo" };
+    case "operation":
+      return { view: "ops", label: "Ir às operações" };
+    default:
+      return { view: "missions", label: "Ver tarefas" };
+  }
+}
+
+/** Atributos HTML data-go (+ compete-tab se houver). */
+export function missionGoAttrs(type) {
+  const d = missionDestination(type);
+  const tab = d.competeTab ? ` data-compete-tab="${d.competeTab}"` : "";
+  return `data-go="${d.view}"${tab}`;
+}
+
 function buildFixedMissions() {
   return DAILY_MISSIONS.map((def) => ({
     id: def.id,

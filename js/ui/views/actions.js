@@ -52,6 +52,11 @@ export function viewTrain(game, s) {
     <p class="view-sub">
       Sessões de campo e de sala. Cada treino soma progresso; o atributo sobe quando a barra enche.
     </p>
+    <div class="btn-row" style="margin-bottom:0.75rem;flex-wrap:wrap;gap:0.4rem">
+      <button type="button" class="btn btn-secondary btn-sm" data-go="missions">Tarefas do dia</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-go="rest">Descansar</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-go="prematch">Pré-jogo</button>
+    </div>
     <div class="panel"><h3>Treino pessoal</h3><div class="action-list">${cards}</div></div>
     <div class="panel">
       <h3>Treino individual do elenco <span class="tag">⚡10 · R$40</span></h3>
@@ -81,6 +86,15 @@ export function viewRest(game, s) {
   return `
     <h1 class="view-title">Descanso</h1>
     <p class="view-sub">Sem disposição o clube para. Durma, recupere e volte à rotina.</p>
+    <div class="btn-row" style="margin-bottom:0.75rem;flex-wrap:wrap;gap:0.4rem">
+      <button type="button" class="btn btn-secondary btn-sm" data-go="train">Voltar ao treino</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-go="missions">Tarefas</button>
+      ${
+        s.boss.injury || s.boss.health < 50
+          ? `<button type="button" class="btn btn-secondary btn-sm" data-go="hospital">Médico →</button>`
+          : ""
+      }
+    </div>
     <div class="panel">
       ${statBar("Energia atual", s.boss.energy, s.boss.maxEnergy)}
       ${statBar("Saúde", s.boss.health, 100, s.boss.health < 40 ? "red" : "")}
@@ -135,5 +149,10 @@ export function viewOps(game) {
   return `
     <h1 class="view-title">Operações</h1>
     <p class="view-sub">Ações de bastidor: scouting, torcida, mercado e rachas — com risco e recompensa.</p>
+    <div class="btn-row" style="margin-bottom:0.75rem;flex-wrap:wrap;gap:0.4rem">
+      <button type="button" class="btn btn-secondary btn-sm" data-go="missions">Tarefas do dia</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-go="market">Mercado</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-go="map">Mapa / influência</button>
+    </div>
     <div class="panel"><div class="action-list">${cards}</div></div>`;
 }

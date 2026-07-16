@@ -1444,6 +1444,15 @@ button.linkish:hover strong {
   .live-match-head { flex-direction: column; }
 }
 
+/* Cards compactos (ex.: tarefas na home) */
+.action-card-compact {
+  padding: 0.55rem 0.65rem;
+  gap: 0.5rem;
+}
+.action-card-compact h4 {
+  font-weight: 600;
+}
+
 /* Painel de operações (sem rota /admin) */
 .ops-wrap {
   max-width: 1200px;

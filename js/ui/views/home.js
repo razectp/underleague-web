@@ -1,5 +1,6 @@
 import { PRACAS, MATCH_ENERGY_COST, CIRCUIT_ENERGY_COST } from "../../config/constants.js";
 import { formatMoney } from "../../core/utils.js";
+import { missionDestination, missionGoAttrs } from "../../systems/missions.js";
 import { statBar, timeStr } from "../format.js";
 import { suggestNextAction, GLOSSARY } from "../guidance.js";
 
@@ -17,13 +18,22 @@ export function viewHome(game, s) {
   const { items, done, total, claimed } = game.missionsSummary();
   const missionPreview = items
     .map((m) => {
-      const tag = m.claimed
-        ? "✓"
-        : m.progress >= m.target
-          ? "★ pronta"
-          : `${m.progress}/${m.target}`;
+      const complete = m.progress >= m.target;
+      const tag = m.claimed ? "✓" : complete ? "★ pronta" : `${m.progress}/${m.target}`;
       const reward = `R$ ${formatMoney(m.prize)}${m.energy ? ` · +${m.energy}⚡` : ""}`;
-      return `<div class="feed-item"><time>${tag}</time>${m.label} · ${reward}</div>`;
+      let btn = "";
+      if (m.claimed) {
+        btn = "";
+      } else if (complete) {
+        btn = `<button type="button" class="btn btn-gold btn-sm" data-claim="${m.id}">Resgatar</button>`;
+      } else {
+        btn = `<button type="button" class="btn btn-primary btn-sm" ${missionGoAttrs(m.type)} title="${missionDestination(m.type).label}">Ir →</button>`;
+      }
+      return `<div class="action-card action-card-compact">
+        <div><h4 style="font-size:0.92rem;margin:0">${m.label} <span class="badge ${m.claimed ? "muted" : complete ? "ok" : "warn"}">${tag}</span></h4>
+        <p style="margin:0.2rem 0 0;font-size:0.82rem;color:var(--muted)">${reward}</p></div>
+        ${btn}
+      </div>`;
     })
     .join("");
 
@@ -115,11 +125,16 @@ export function viewHome(game, s) {
       </div>
       <div class="panel">
         <h3>Tarefas do dia <span class="tag">${claimed}/${total} resgatadas</span></h3>
-        ${missionPreview || `<div class="empty">Sem tarefas</div>`}
-        <p class="micro-help" style="margin-top:0.4rem">${done}/${total} completas · checklist fixo todo dia</p>
+        <div class="action-list" style="gap:0.4rem">${missionPreview || `<div class="empty">Sem tarefas</div>`}</div>
+        <p class="micro-help" style="margin-top:0.4rem">${done}/${total} completas · use Ir → para ir ao local</p>
         <div class="btn-row" style="margin-top:0.75rem">
-          <button class="btn btn-gold btn-sm" data-go="missions">Ver tarefas</button>
+          <button class="btn btn-secondary btn-sm" data-go="missions">Lista completa</button>
           <button class="btn btn-secondary btn-sm" data-go="rest">Descansar</button>
+          ${
+            s.squad.some((p) => p.injury) || s.boss.injury
+              ? `<button class="btn btn-secondary btn-sm" data-go="hospital">Médico</button>`
+              : ""
+          }
         </div>
       </div>
     </div>

@@ -191,5 +191,20 @@ export function createApp(game) {
     toast
   };
 
+  // Delegação global: data-go funciona no main e no trilho (chrome re-renderiza sem rebind)
+  if (typeof document !== "undefined" && !document.documentElement.dataset.ulGoBound) {
+    document.documentElement.dataset.ulGoBound = "1";
+    document.addEventListener("click", (event) => {
+      const btn = event.target?.closest?.("[data-go]");
+      if (!btn || btn.disabled) return;
+      // botões com handlers próprios mais específicos já tratam; data-go é navegação
+      if (btn.closest("#modal-root")) return;
+      event.preventDefault();
+      const opts = {};
+      if (btn.dataset.competeTab) opts.competeTab = btn.dataset.competeTab;
+      app.setView(btn.dataset.go, opts);
+    });
+  }
+
   return app;
 }

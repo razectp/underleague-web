@@ -45,16 +45,10 @@ export function bindViewEvents(game, app) {
     return result;
   };
 
-  root.querySelectorAll("[data-go]").forEach((btn) => {
-    btn.onclick = () => {
-      const opts = {};
-      if (btn.dataset.competeTab) opts.competeTab = btn.dataset.competeTab;
-      app.setView(btn.dataset.go, opts);
-    };
-  });
+  // Navegação data-go: delegação global em App.js (main + trilho)
 
   root.querySelectorAll("[data-compete-tab]").forEach((btn) => {
-    if (btn.dataset.go) return; // já tratado em data-go
+    if (btn.dataset.go) return; // tratado pela delegação data-go
     btn.onclick = async () => {
       const tab = btn.dataset.competeTab;
       setCompeteTab(tab);
