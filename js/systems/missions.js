@@ -95,7 +95,7 @@ export function missionDestination(type) {
     case "train":
       return { view: "train", label: "Ir ao treino" };
     case "squad_train":
-      return { view: "train", label: "Ir ao elenco" };
+      return { view: "train", label: "Ir ao treino" };
     case "rest":
       return { view: "rest", label: "Ir descansar" };
     case "circuit":
