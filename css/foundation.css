@@ -269,6 +269,29 @@ video {
   transform: none;
 }
 
+.btn[aria-busy="true"] {
+  opacity: 0.78;
+  cursor: progress;
+}
+
+.btn[aria-busy="true"]::after {
+  content: "";
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: action-spin 0.7s linear infinite;
+}
+
+.content.is-action-pending {
+  cursor: progress;
+}
+
+@keyframes action-spin {
+  to { transform: rotate(360deg); }
+}
+
 .btn-primary {
   background: linear-gradient(180deg, #3ecf6a 0%, #249a48 100%);
   color: #041208;

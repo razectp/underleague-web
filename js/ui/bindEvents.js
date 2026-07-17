@@ -19,6 +19,15 @@ export function bindViewEvents(game, app) {
   if (!root) return;
 
   const after = async (resultOrPromise, failType = "bad") => {
+    const active = root.contains(document.activeElement) ? document.activeElement : null;
+    const control = active?.matches?.("button, input, select") ? active : null;
+    const wasDisabled = !!control?.disabled;
+    root.classList.add("is-action-pending");
+    root.setAttribute("aria-busy", "true");
+    if (control) {
+      control.setAttribute("aria-busy", "true");
+      control.disabled = true;
+    }
     let result = resultOrPromise;
     try {
       if (resultOrPromise && typeof resultOrPromise.then === "function") {
@@ -28,6 +37,13 @@ export function bindViewEvents(game, app) {
       toast(e?.message || "Falha na ação.", failType);
       app.render();
       return;
+    } finally {
+      root.classList.remove("is-action-pending");
+      root.removeAttribute("aria-busy");
+      if (control?.isConnected) {
+        control.removeAttribute("aria-busy");
+        control.disabled = wasDisabled;
+      }
     }
     // Com autoridade no servidor, game.notify não chega no browser.
     // O texto de feedback vem em result.msg (sucesso ou falha).

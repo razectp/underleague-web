@@ -38,6 +38,11 @@ export function getApiBase() {
 }
 
 const DEFAULT_TIMEOUT_MS = 12_000;
+let pendingGameActions = 0;
+
+export function hasPendingGameAction() {
+  return pendingGameActions > 0;
+}
 
 export async function request(
   path,
@@ -85,6 +90,23 @@ export async function request(
   }
 }
 
+async function gameAction(action, payload = {}, sync = {}) {
+  pendingGameActions += 1;
+  try {
+    return await request("/api/game/action", {
+      method: "POST",
+      body: {
+        action,
+        payload,
+        stateMode: sync.stateMode,
+        baseRevision: sync.baseRevision
+      }
+    });
+  } finally {
+    pendingGameActions = Math.max(0, pendingGameActions - 1);
+  }
+}
+
 export const api = {
   health: () => request("/api/health", { auth: false }),
   register: (payload) =>
@@ -96,11 +118,7 @@ export const api = {
 
   gameState: () => request("/api/game/state"),
 
-  gameAction: (action, payload = {}) =>
-    request("/api/game/action", {
-      method: "POST",
-      body: { action, payload }
-    }),
+  gameAction,
 
   players: () => request("/api/players"),
   challenge: (toUserId) =>

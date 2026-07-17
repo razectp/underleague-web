@@ -10,7 +10,13 @@ import { createApp } from "./ui/App.js";
 import { $, toast } from "./ui/dom.js";
 import { refreshChrome } from "./ui/chrome.js";
 import { timeStr, tickCountdownNodes } from "./ui/format.js";
-import { api, setToken, getToken, probeServer } from "./net/api.js";
+import {
+  api,
+  setToken,
+  getToken,
+  probeServer,
+  hasPendingGameAction
+} from "./net/api.js";
 import { enableServerAuthority } from "./net/serverAuthority.js";
 import { managerName } from "./data/generators.js";
 import { refreshLobby, fillDemoCredentials } from "./ui/lobby.js";
@@ -21,6 +27,9 @@ game.toastVia = toast;
 enableServerAuthority(game);
 
 let lastServerOk = null;
+let lastStateSyncAt = 0;
+let quietSyncPromise = null;
+const BACKGROUND_SYNC_MS = 120_000;
 
 function setCampaignAccess({ connected = false, hasGame = false } = {}) {
   const createPanel = $("#panel-create");
@@ -109,17 +118,32 @@ async function loadServerState() {
     setCampaignAccess({ connected: true, hasGame: false });
     return { ok: true, hasGame: false };
   }
-  game.acceptServerState(response.gameState);
+  game.acceptServerState(response.gameState, response.stateRevision);
+  lastStateSyncAt = Date.now();
   setCampaignAccess({ connected: true, hasGame: true });
   return { ok: true, hasGame: true };
 }
 
 async function syncServerQuiet() {
-  if (!getToken() || !game.state) return;
-  const result = await loadServerState();
-  if (!result.ok && $("#screen-game")?.classList.contains("active")) {
-    toast(result.error || "Não foi possível atualizar seu progresso agora.", "bad");
-  }
+  if (!getToken() || !game.state || document.hidden || hasPendingGameAction()) return;
+  if (quietSyncPromise) return quietSyncPromise;
+  quietSyncPromise = loadServerState()
+    .then((result) => {
+      if (!result.ok && $("#screen-game")?.classList.contains("active")) {
+        toast(result.error || "Não foi possível atualizar seu progresso agora.", "bad");
+      }
+      return result;
+    })
+    .finally(() => {
+      quietSyncPromise = null;
+    });
+  return quietSyncPromise;
+}
+
+async function backgroundRefresh() {
+  if (document.hidden) return;
+  if (getToken() && game.state) await syncServerQuiet();
+  else await checkServer({ quiet: true });
 }
 
 async function doLogin(user, pass, { autoEnter = true } = {}) {
@@ -385,13 +409,14 @@ function bindGlobal() {
     });
   });
 
-  setInterval(() => {
-    syncServerQuiet();
-  }, 60000);
-
-  setInterval(() => {
-    checkServer({ quiet: true });
-  }, 120000);
+  // Uma única atualização periódica. Abas ocultas não baixam o estado;
+  // ao voltar, sincronizam apenas se a última leitura já estiver vencida.
+  setInterval(backgroundRefresh, BACKGROUND_SYNC_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && Date.now() - lastStateSyncAt >= BACKGROUND_SYNC_MS) {
+      backgroundRefresh();
+    }
+  });
 
   ["input-email", "input-password"].forEach((id) => {
     const el = document.getElementById(id);

@@ -44,6 +44,7 @@ export class Game {
   constructor() {
     /** @type {object|null} */
     this.state = null;
+    this.stateRevision = null;
     this.listeners = [];
     /** @type {null|((text:string, type?:string)=>void)} */
     this.toastVia = null;
@@ -72,6 +73,7 @@ export class Game {
 
   wipe() {
     this.state = null;
+    this.stateRevision = null;
   }
 
   hydrate(rawState) {
@@ -85,9 +87,10 @@ export class Game {
   }
 
   /** Aceita exclusivamente o snapshot já validado e normalizado pela API. */
-  acceptServerState(rawState) {
+  acceptServerState(rawState, revision = null) {
     if (!rawState || typeof rawState !== "object") return null;
     this.state = JSON.parse(JSON.stringify(rawState));
+    this.stateRevision = Number.isSafeInteger(Number(revision)) ? Number(revision) : null;
     this.emit();
     return this.state;
   }

@@ -4,6 +4,10 @@
  */
 
 import { api, getToken } from "./api.js";
+import {
+  STATE_PATCH_MODE,
+  applyTopLevelStatePatch
+} from "../core/statePatch.js";
 
 /**
  * @param {import('../game/Game.js').Game} game
@@ -25,7 +29,10 @@ export function enableServerAuthority(game) {
     if (!getToken()) {
       return { ok: false, msg: "Faça login para continuar." };
     }
-    const r = await api.gameAction(action, payload);
+    const r = await api.gameAction(action, payload, {
+      stateMode: STATE_PATCH_MODE,
+      baseRevision: this.stateRevision
+    });
     if (!r.ok) {
       return {
         ok: false,
@@ -33,8 +40,19 @@ export function enableServerAuthority(game) {
         error: r.error
       };
     }
-    if (r.gameState) {
-      this.acceptServerState(r.gameState);
+    if (r.gameStatePatch) {
+      const next = applyTopLevelStatePatch(this.state, r.gameStatePatch, this.stateRevision);
+      if (next) this.acceptServerState(next, r.gameStatePatch.revision);
+      else {
+        // Defesa para respostas inconsistentes: uma leitura completa corrige
+        // revisão antiga/múltiplas abas sem aplicar patch sobre base errada.
+        const fresh = await api.gameState();
+        if (fresh.ok && fresh.gameState) {
+          this.acceptServerState(fresh.gameState, fresh.stateRevision);
+        }
+      }
+    } else if (r.gameState) {
+      this.acceptServerState(r.gameState, r.stateRevision);
     }
     // Resultado da ação (ok/msg/live/…)
     const result = r.result && typeof r.result === "object" ? { ...r.result } : { ok: true };
