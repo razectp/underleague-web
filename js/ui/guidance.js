@@ -19,7 +19,7 @@ export const GLOSSARY = {
 
 /**
  * Decide a melhor próxima ação para o jogador (prioridade legível).
- * @returns {{ id: string, title: string, why: string, view: string, action?: string, primary?: boolean }}
+ * @returns {{ id: string, title: string, why: string, view?: string, tab?: string, actionable?: boolean, primary?: boolean }}
  */
 export function suggestNextAction(game) {
   const s = game.state;
@@ -92,7 +92,7 @@ export function suggestNextAction(game) {
       id: "wait-day",
       title: "Aguarde o próximo dia",
       why: "Você já jogou a liga neste dia de jogo. Quando o dia do clube virar (≈ 5 h reais), libera a próxima rodada e as comissões rivais também avançam.",
-      view: "home",
+      actionable: false,
       primary: false
     };
   }

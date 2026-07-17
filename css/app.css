@@ -395,6 +395,17 @@
   line-height: 1.4;
 }
 
+.next-action-wait {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
 .micro-help {
   margin: 0.35rem 0 0;
   font-size: 0.82rem;

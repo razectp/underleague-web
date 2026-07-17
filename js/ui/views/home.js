@@ -5,7 +5,12 @@ import {
   missionGoAttrs,
   missionWaitInfo
 } from "../../systems/missions.js";
-import { formatCountdownHMS, statBar, timeStr } from "../format.js";
+import {
+  formatCountdownHMS,
+  msUntilNextGameDay,
+  statBar,
+  timeStr
+} from "../format.js";
 import { suggestNextAction, GLOSSARY } from "../guidance.js";
 
 export function viewHome(game, s) {
@@ -71,6 +76,20 @@ export function viewHome(game, s) {
 
   const tip = suggestNextAction(game);
   const tipTabAttr = tip.tab ? ` data-compete-tab="${tip.tab}"` : "";
+  const tipControl =
+    tip.actionable === false
+      ? (() => {
+          const remainingMs = msUntilNextGameDay(s, now);
+          return `<div class="next-action-wait" role="status">
+            <span class="badge warn">Aguardando</span>
+            <strong
+              data-countdown-until="${now + remainingMs}"
+              data-countdown-prefix="próximo dia em"
+              data-countdown-done="novo dia disponível"
+            >próximo dia em ${formatCountdownHMS(remainingMs)}</strong>
+          </div>`;
+        })()
+      : `<button type="button" class="btn btn-primary" data-go="${tip.view}"${tipTabAttr}>Fazer isso</button>`;
 
   const tut = s.tutorial || { step: 0, done: false };
   const tutSteps = [
@@ -113,7 +132,7 @@ export function viewHome(game, s) {
         <h2>${tip.title}</h2>
         <p>${tip.why}</p>
       </div>
-      <button type="button" class="btn btn-primary" data-go="${tip.view}"${tipTabAttr}>Fazer isso</button>
+      ${tipControl}
     </div>
 
     <div class="hero-line">
