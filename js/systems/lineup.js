@@ -43,14 +43,28 @@ export function autoFillLineup(game) {
   return s.lineup;
 }
 
-export function getStartingXI(game) {
+/**
+ * Resolve o XI atual.
+ * @param {{ fill?: boolean }} [opts]
+ *   fill=true (padrão): se a escalação ainda está em modo auto e faltar gente,
+ *   completa o XI. Nunca força re-preenchimento quando o jogador escalou à mão
+ *   (lineup.auto === false) — senão "Tirar" na UI parece não funcionar.
+ *   fill=false: só lê o que está salvo (usado pelo resumo da tela de escalação).
+ */
+export function getStartingXI(game, opts = {}) {
   const s = game.state;
   ensureLineup(s);
-  if (s.lineup.starters.length < 11) autoFillLineup(game);
+  const allowFill = opts.fill !== false && s.lineup.auto !== false;
+
+  if (allowFill && s.lineup.starters.length < 11) {
+    autoFillLineup(game);
+  }
+
   const byId = new Map(s.squad.map((p) => [p.id, p]));
   const xi = s.lineup.starters.map((id) => byId.get(id)).filter(Boolean);
-  // se ainda faltar, completa com bestXI
-  if (xi.length < 11) {
+
+  // Completa com bestXI só em modo auto (lesão/suspensão tirou alguém, etc.).
+  if (allowFill && xi.length < 11) {
     const auto = bestXI(s.squad, s.club.formation);
     const used = new Set(xi.map((p) => p.id));
     for (const p of auto) {
@@ -111,7 +125,8 @@ export function toggleLineupPlayer(game, playerId) {
 
 export function lineupSummary(game) {
   ensureLineup(game.state);
-  const starters = getStartingXI(game);
+  // Leitura pura: montar a UI não pode reescrever a escalação do jogador.
+  const starters = getStartingXI(game, { fill: false });
   const bench = getBenchPlayers(game);
   const need = FORMATIONS[game.state.club.formation] || FORMATIONS["4-3-3"];
   const counts = {};
