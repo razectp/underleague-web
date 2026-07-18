@@ -7,8 +7,9 @@ import { clamp, formatMoney } from "../core/utils.js";
 import { TRAININGS, OPERATIONS } from "../config/constants.js";
 import {
   cooldownRemainingMs,
-  msUntilNextGameDay,
-  formatCountdownHMS
+  formatCountdownHMS,
+  formatWaitDual,
+  msUntilMatchAvailable
 } from "../ui/format.js";
 
 /**
@@ -139,9 +140,9 @@ export function missionWaitInfo(game, mission, now = Date.now()) {
 
   switch (mission.type) {
     case "match": {
-      if (s.boss?.lastMatchDay === s.day) {
-        remainingMs = msUntilNextGameDay(s, now);
-        label = "Tempo até a próxima partida da liga";
+      remainingMs = msUntilMatchAvailable(s, s.boss?.lastMatchDay, now);
+      if (remainingMs > 0) {
+        label = "Próxima partida da liga (dia de jogo)";
       }
       break;
     }
@@ -184,12 +185,18 @@ export function missionWaitInfo(game, mission, now = Date.now()) {
 
   if (!(remainingMs > 1000)) return null;
   const until = now + remainingMs;
+  const waitText =
+    mission.type === "match"
+      ? formatWaitDual(remainingMs, { prefix: "faltam" })
+      : `volte em ${formatCountdownHMS(remainingMs)}`;
   return {
     kind: mission.type,
     label,
     remainingMs,
     until,
-    text: `${label} · volte em ${formatCountdownHMS(remainingMs)}`
+    /** dual = prioriza horas de jogo do clube na UI ao vivo */
+    countdownMode: mission.type === "match" ? "dual" : "real",
+    text: `${label} · ${waitText}`
   };
 }
 

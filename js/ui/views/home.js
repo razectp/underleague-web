@@ -7,7 +7,8 @@ import {
 } from "../../systems/missions.js";
 import {
   formatCountdownHMS,
-  msUntilNextGameDay,
+  formatWaitDual,
+  msUntilMatchAvailable,
   statBar,
   timeStr
 } from "../format.js";
@@ -48,9 +49,19 @@ export function viewHome(game, s) {
       } else {
         btn = `<button type="button" class="btn btn-primary btn-sm" ${missionGoAttrs(m.type)} title="${missionDestination(m.type).label}">Ir →</button>`;
       }
+      const waitMode = wait?.countdownMode || "real";
       const waitLine = wait
         ? `<p class="mission-wait" style="margin:0.25rem 0 0;font-size:0.78rem;color:var(--muted)">
-            <strong data-countdown-until="${wait.until}" data-countdown-prefix="volte em" data-countdown-done="disponível agora">volte em ${formatCountdownHMS(wait.remainingMs)}</strong>
+            <strong
+              data-countdown-until="${wait.until}"
+              data-countdown-mode="${waitMode}"
+              data-countdown-prefix="${waitMode === "dual" || waitMode === "game" ? "faltam" : "volte em"}"
+              data-countdown-done="disponível agora"
+            >${
+              waitMode === "dual" || waitMode === "game"
+                ? formatWaitDual(wait.remainingMs, { prefix: "faltam" })
+                : `volte em ${formatCountdownHMS(wait.remainingMs)}`
+            }</strong>
           </p>`
         : "";
       return `<div class="action-card action-card-compact">
@@ -79,14 +90,15 @@ export function viewHome(game, s) {
   const tipControl =
     tip.actionable === false
       ? (() => {
-          const remainingMs = msUntilNextGameDay(s, now);
+          const remainingMs = msUntilMatchAvailable(s, s.boss.lastMatchDay, now);
           return `<div class="next-action-wait" role="status">
             <span class="badge warn">Aguardando</span>
             <strong
               data-countdown-until="${now + remainingMs}"
-              data-countdown-prefix="próximo dia em"
+              data-countdown-mode="dual"
+              data-countdown-prefix="faltam"
               data-countdown-done="novo dia disponível"
-            >próximo dia em ${formatCountdownHMS(remainingMs)}</strong>
+            >${formatWaitDual(remainingMs, { prefix: "faltam" })}</strong>
           </div>`;
         })()
       : `<button type="button" class="btn btn-primary" data-go="${tip.view}"${tipTabAttr}>Fazer isso</button>`;

@@ -5,6 +5,7 @@
 
 import { APPROACHES, CIRCUIT_ENERGY_COST, MATCH_ENERGY_COST } from "../config/constants.js";
 import { missionDestination } from "../systems/missions.js";
+import { liveGameDay } from "./format.js";
 
 /** Glossário curto (hover / primeira leitura) */
 export const GLOSSARY = {
@@ -14,7 +15,7 @@ export const GLOSSARY = {
   rep: "Prestígio: fama do projeto. Sobe com vitórias e missões.",
   health: "Disposição: se cair demais, ações ficam bloqueadas. Descanse ou vá ao médico.",
   ovr: "OVR: força geral do jogador. Quanto maior, melhor no XI.",
-  day: "Dia de jogo do clube. O tempo do jogo corre sozinho: 1 dia ≈ 5 horas reais. A liga permite 1 partida oficial por dia de jogo."
+  day: "Dia de jogo do clube. Configurado: 1 dia completo = 24 h de jogo = 5 horas reais. A liga permite 1 partida oficial por dia de jogo."
 };
 
 /**
@@ -69,7 +70,10 @@ export function suggestNextAction(game) {
     };
   }
 
-  const canMatch = s.boss.lastMatchDay !== s.day && s.boss.energy >= MATCH_ENERGY_COST;
+  const dayLive = liveGameDay(s);
+  const alreadyPlayedToday =
+    s.boss.lastMatchDay != null && s.boss.lastMatchDay >= dayLive;
+  const canMatch = !alreadyPlayedToday && s.boss.energy >= MATCH_ENERGY_COST;
   const next = game.getNextFixture();
   if (canMatch && next) {
     const f = next.fixture;
@@ -81,17 +85,17 @@ export function suggestNextAction(game) {
     return {
       id: "match",
       title: "Jogar a rodada da liga",
-      why: `vs ${opp?.name || "adversário"} · ⚡${MATCH_ENERGY_COST} · 1 partida por dia do clube${planHint}.`,
+      why: `vs ${opp?.name || "adversário"} · ⚡${MATCH_ENERGY_COST} · 1 partida por dia de jogo (1 dia ≈ 5 h reais)${planHint}.`,
       view: "compete",
       tab: "liga",
       primary: true
     };
   }
-  if (s.boss.lastMatchDay === s.day && next) {
+  if (alreadyPlayedToday && next) {
     return {
       id: "wait-day",
-      title: "Aguarde o próximo dia",
-      why: "Você já jogou a liga neste dia de jogo. Quando o dia do clube virar (≈ 5 h reais), libera a próxima rodada e as comissões rivais também avançam.",
+      title: "Aguarde o próximo dia de jogo",
+      why: "Você já jogou a liga neste dia do clube. A próxima rodada libera na virada do dia (até 24 h de jogo ≈ 5 h reais, conforme o horário atual do clube).",
       actionable: false,
       primary: false
     };

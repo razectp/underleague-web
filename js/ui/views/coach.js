@@ -11,7 +11,11 @@ import { FACILITY_DEFS, ensureFacilities, facilityUpgradeCost } from "../../syst
 import { seasonGoalsSummary } from "../../systems/seasonGoals.js";
 import { APPROACHES } from "../../config/constants.js";
 import { MATCH_ENERGY_COST } from "../../config/constants.js";
-import { formatCountdownHMS, msUntilNextGameDay } from "../format.js";
+import {
+  formatWaitDual,
+  liveGameDay,
+  msUntilMatchAvailable
+} from "../format.js";
 import { playerNameHtml } from "../text.js";
 
 export function viewLineup(game, s) {
@@ -76,20 +80,31 @@ export function viewPrematch(game, s) {
   const oppXI = game.bestXI(game.getSquad(opp.id), opp.formation);
   const oppPower = Math.round(game.teamStrength(oppXI, opp, null));
   const fit = game.tacticalMatchup(s.club, opp);
-  const canPlay = s.boss.lastMatchDay !== s.day && sum.full && s.boss.energy >= MATCH_ENERGY_COST;
-  const nextMatchMs =
-    s.boss.lastMatchDay === s.day ? msUntilNextGameDay(s) : 0;
+  const dayLive = liveGameDay(s);
+  const alreadyPlayedToday =
+    s.boss.lastMatchDay != null && s.boss.lastMatchDay >= dayLive;
+  const canPlay =
+    !alreadyPlayedToday && sum.full && s.boss.energy >= MATCH_ENERGY_COST;
+  const nextMatchMs = alreadyPlayedToday
+    ? msUntilMatchAvailable(s, s.boss.lastMatchDay)
+    : 0;
   const nextMatchWait =
     nextMatchMs > 1000
       ? `<p class="mission-wait micro-help" style="margin-top:0.45rem">
-          Tempo até a próxima partida ·
-          <strong data-countdown-until="${Date.now() + nextMatchMs}" data-countdown-prefix="volte em" data-countdown-done="disponível agora">volte em ${formatCountdownHMS(nextMatchMs)}</strong>
+          Próxima partida libera no <strong>próximo dia de jogo</strong>
+          (1 dia do clube ≈ 5 h reais) ·
+          <strong
+            data-countdown-until="${Date.now() + nextMatchMs}"
+            data-countdown-mode="dual"
+            data-countdown-prefix="faltam"
+            data-countdown-done="disponível agora"
+          >${formatWaitDual(nextMatchMs, { prefix: "faltam" })}</strong>
         </p>`
       : "";
 
   return `
     <h1 class="view-title">Pré-jogo</h1>
-    <p class="view-sub">${where} vs <strong>${opp.name}</strong> · ⚡${MATCH_ENERGY_COST} · 1x por dia</p>
+    <p class="view-sub">${where} vs <strong>${opp.name}</strong> · ⚡${MATCH_ENERGY_COST} · 1x por dia de jogo</p>
     <div class="hero-line">
       Força XI: <strong>${myPower}</strong> × Rival ~${oppPower}<br>
       Tática: ${s.club.formation} · ${s.club.mentality} · ${APPROACHES[s.club.approach]?.label || s.club.approach}<br>
@@ -120,7 +135,7 @@ export function viewPrematch(game, s) {
     <div class="panel">
       <div class="btn-row is-center">
         <button type="button" class="btn btn-primary" id="btn-play-match" ${canPlay ? "" : "disabled"}>
-          ${s.boss.lastMatchDay === s.day ? "Já jogou hoje" : !sum.full ? "Complete o XI" : s.boss.energy < MATCH_ENERGY_COST ? "Sem energia" : "Iniciar partida"}
+          ${alreadyPlayedToday ? "Já jogou neste dia" : !sum.full ? "Complete o XI" : s.boss.energy < MATCH_ENERGY_COST ? "Sem energia" : "Iniciar partida"}
         </button>
       </div>
     </div>`;

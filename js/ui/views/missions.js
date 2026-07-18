@@ -14,15 +14,20 @@ function rewardLine(m) {
 
 function waitHtml(wait) {
   if (!wait) return "";
+  const mode = wait.countdownMode || "real";
+  const prefix = mode === "dual" || mode === "game" ? "faltam" : "volte em";
+  // text já vem formatado (dual em horas de jogo ou HMS real)
+  const body = wait.text.includes(" · ") ? wait.text.split(" · ").slice(1).join(" · ") : wait.text;
   return `<p class="mission-wait micro-help" style="margin-top:0.4rem">
     <span class="badge warn">Aguarde</span>
     ${wait.label} ·
     <strong
       class="mission-countdown"
       data-countdown-until="${wait.until}"
-      data-countdown-prefix="volte em"
+      data-countdown-mode="${mode}"
+      data-countdown-prefix="${prefix}"
       data-countdown-done="disponível agora"
-    >volte em ${wait.text.split("volte em ")[1] || "—"}</strong>
+    >${body}</strong>
   </p>`;
 }
 
@@ -84,7 +89,9 @@ export function viewMissions(game) {
     quickNav = `<button type="button" class="btn btn-primary btn-sm" ${missionGoAttrs(nextOpen.type)}>${missionDestination(nextOpen.type).label}: ${nextOpen.label} →</button>`;
   } else if (nextWait) {
     const w = missionWaitInfo(game, nextWait, now);
-    quickNav = `<span class="micro-help">${nextWait.label}: <strong data-countdown-until="${w.until}" data-countdown-prefix="volte em" data-countdown-done="disponível agora">volte em …</strong></span>`;
+    const mode = w.countdownMode || "real";
+    const prefix = mode === "dual" || mode === "game" ? "faltam" : "volte em";
+    quickNav = `<span class="micro-help">${nextWait.label}: <strong data-countdown-until="${w.until}" data-countdown-mode="${mode}" data-countdown-prefix="${prefix}" data-countdown-done="disponível agora">${prefix} …</strong></span>`;
   } else {
     quickNav = `<button type="button" class="btn btn-secondary btn-sm" data-go="home">Voltar ao time</button>`;
   }
