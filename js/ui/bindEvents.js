@@ -317,6 +317,16 @@ export function bindViewEvents(game, app) {
   });
 
   /* —— rankings —— */
+  root.querySelectorAll("[data-squad-sort]").forEach((btn) => {
+    btn.onclick = () => {
+      const allowed = new Set(["pos", "ovr", "form", "sta", "morale", "value"]);
+      const next = btn.dataset.squadSort || "pos";
+      window.__UL_SQUAD_UI = window.__UL_SQUAD_UI || { sort: "pos" };
+      window.__UL_SQUAD_UI.sort = allowed.has(next) ? next : "pos";
+      app.setView("squad", { focus: false });
+    };
+  });
+
   root.querySelectorAll("[data-rank-tab]").forEach((btn) => {
     btn.onclick = () => {
       window.__UL_RANK_UI = window.__UL_RANK_UI || {

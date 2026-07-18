@@ -3,6 +3,7 @@
 import {
   APPROACHES,
   FORMATIONS,
+  POSITIONS,
   POS_LINE,
   MARKET_FEE_RATE,
   MATCH_ENERGY_COST
@@ -17,60 +18,174 @@ import {
 } from "../../systems/availability.js";
 import { selectNpcXI } from "../../systems/npcAi.js";
 
+/** Ordem tática de cima pra baixo: GOL → defesa → meio → ataque. */
+const POS_ORDER = Object.fromEntries(POSITIONS.map((pos, i) => [pos, i]));
+
+const POS_LABELS = {
+  GOL: "Goleiros",
+  ZAG: "Zagueiros",
+  LAT: "Laterais",
+  VOL: "Volantes",
+  MEI: "Meias",
+  PE: "Pontas (E)",
+  PD: "Pontas (D)",
+  ATA: "Atacantes"
+};
+
+const SQUAD_SORTS = [
+  { id: "pos", label: "Posição" },
+  { id: "ovr", label: "OVR" },
+  { id: "form", label: "Forma" },
+  { id: "sta", label: "Sta" },
+  { id: "morale", label: "Moral" },
+  { id: "value", label: "Valor" }
+];
+
+function getSquadSort() {
+  const allowed = new Set(SQUAD_SORTS.map((s) => s.id));
+  const raw =
+    (typeof window !== "undefined" && window.__UL_SQUAD_UI?.sort) || "pos";
+  return allowed.has(raw) ? raw : "pos";
+}
+
+function posRank(pos) {
+  return POS_ORDER[pos] ?? 99;
+}
+
+/** Ordena o elenco; padrão = posição (GOL primeiro … ATA por último). */
+export function sortSquadPlayers(squad, sortBy = "pos") {
+  const list = [...(squad || [])];
+  const byOvr = (a, b) => (b.overall || 0) - (a.overall || 0);
+  const byName = (a, b) =>
+    String(a.name || "").localeCompare(String(b.name || ""), "pt");
+
+  list.sort((a, b) => {
+    let cmp = 0;
+    switch (sortBy) {
+      case "ovr":
+        cmp = byOvr(a, b);
+        break;
+      case "form":
+        cmp = (b.form || 0) - (a.form || 0);
+        break;
+      case "sta":
+        cmp = Math.floor(b.stamina || 0) - Math.floor(a.stamina || 0);
+        break;
+      case "morale":
+        cmp = (b.morale || 0) - (a.morale || 0);
+        break;
+      case "value":
+        cmp = (b.value || 0) - (a.value || 0);
+        break;
+      case "pos":
+      default:
+        cmp = posRank(a.pos) - posRank(b.pos);
+        break;
+    }
+    if (cmp !== 0) return cmp;
+    // Desempate estável: posição → OVR → nome
+    cmp = posRank(a.pos) - posRank(b.pos);
+    if (cmp !== 0) return cmp;
+    cmp = byOvr(a, b);
+    if (cmp !== 0) return cmp;
+    return byName(a, b);
+  });
+  return list;
+}
+
+function squadSortBtn(id, label, active) {
+  return `<button type="button" class="tab ${active ? "active" : ""}" data-squad-sort="${id}">${label}</button>`;
+}
+
+function thSort(id, label, activeSort) {
+  const active = activeSort === id;
+  return `<th class="num">
+    <button type="button" class="linkish squad-th-sort ${active ? "is-active" : ""}" data-squad-sort="${id}" title="Ordenar por ${label}">
+      ${label}${active ? " ▾" : ""}
+    </button>
+  </th>`;
+}
+
 export function viewSquad(game, s) {
   const report = squadAvailabilityReport(s.squad);
-  const rows = [...s.squad]
-    .sort((a, b) => b.overall - a.overall)
-    .map((p) => {
-      const av = playerAvailability(p);
-      let statusBadge;
-      if (av.reason === "injured") {
-        statusBadge = `<span class="badge bad" title="${av.detail}">Lesão</span>`;
-      } else if (av.reason === "suspended") {
-        statusBadge = `<span class="badge warn" title="${av.detail}">Suspenso</span>`;
-      } else if (av.reason === "exhausted") {
-        statusBadge = `<span class="badge muted" title="${av.detail}">Exausto</span>`;
-      } else {
-        statusBadge = `<span class="badge ok">Apto</span>`;
-      }
-      const y = p.seasonYellows || 0;
-      return `<tr>
-        <td><span class="pos">${p.pos}</span></td>
-        <td>
-          <button class="linkish" data-player="${p.id}" title="Ver ficha">
-            <strong>${esc(playerDisplayName(p))}</strong>
-          </button>
-          <br><span style="color:var(--dim);font-size:0.75rem">${p.age}a · J${p.games || 0} G${p.goals || 0} A${p.assists || 0}${p.ratingCount ? ` · nota ${((p.ratingSum || 0) / p.ratingCount).toFixed(1)}` : ""}${y ? ` · 🟨${y}` : ""}</span>
-        </td>
-        <td class="num">${p.overall}</td>
-        <td class="num">${p.form}</td>
-        <td class="num">${Math.floor(p.stamina)}</td>
-        <td class="num">${p.morale}</td>
-        <td>${statusBadge}</td>
-        <td class="num">R$ ${formatMoney(p.value)}</td>
-        <td><div class="btn-row">
-          <button class="btn btn-ghost btn-sm" data-nickname="${p.id}">Apelido</button>
-          <button class="btn btn-ghost btn-sm" data-sell="${p.id}">Vender</button>
-        </div></td>
-      </tr>`;
-    })
-    .join("");
+  const sortBy = getSquadSort();
+  const sorted = sortSquadPlayers(s.squad, sortBy);
+
+  const rows = [];
+  let lastPos = null;
+  for (const p of sorted) {
+    if (sortBy === "pos" && p.pos !== lastPos) {
+      lastPos = p.pos;
+      const label = POS_LABELS[p.pos] || p.pos;
+      rows.push(
+        `<tr class="squad-pos-group"><td colspan="9"><span class="pos">${esc(p.pos)}</span> ${esc(label)}</td></tr>`
+      );
+    }
+    const av = playerAvailability(p);
+    let statusBadge;
+    if (av.reason === "injured") {
+      statusBadge = `<span class="badge bad" title="${av.detail}">Lesão</span>`;
+    } else if (av.reason === "suspended") {
+      statusBadge = `<span class="badge warn" title="${av.detail}">Suspenso</span>`;
+    } else if (av.reason === "exhausted") {
+      statusBadge = `<span class="badge muted" title="${av.detail}">Exausto</span>`;
+    } else {
+      statusBadge = `<span class="badge ok">Apto</span>`;
+    }
+    const y = p.seasonYellows || 0;
+    rows.push(`<tr>
+      <td><span class="pos">${p.pos}</span></td>
+      <td>
+        <button class="linkish" data-player="${p.id}" title="Ver ficha">
+          <strong>${esc(playerDisplayName(p))}</strong>
+        </button>
+        <br><span style="color:var(--dim);font-size:0.75rem">${p.age}a · J${p.games || 0} G${p.goals || 0} A${p.assists || 0}${p.ratingCount ? ` · nota ${((p.ratingSum || 0) / p.ratingCount).toFixed(1)}` : ""}${y ? ` · 🟨${y}` : ""}</span>
+      </td>
+      <td class="num">${p.overall}</td>
+      <td class="num">${p.form}</td>
+      <td class="num">${Math.floor(p.stamina)}</td>
+      <td class="num">${p.morale}</td>
+      <td>${statusBadge}</td>
+      <td class="num">R$ ${formatMoney(p.value)}</td>
+      <td><div class="btn-row">
+        <button class="btn btn-ghost btn-sm" data-nickname="${p.id}">Apelido</button>
+        <button class="btn btn-ghost btn-sm" data-sell="${p.id}">Vender</button>
+      </div></td>
+    </tr>`);
+  }
 
   const avg = Math.round(s.squad.reduce((a, p) => a + p.overall, 0) / Math.max(1, s.squad.length));
   const warnHtml = report.warnings
     .map((w) => `<div class="msg ${w.level === "critical" ? "bad" : w.level === "warn" ? "warn" : "info"}">${w.text}</div>`)
     .join("");
+  const sortLabel = SQUAD_SORTS.find((x) => x.id === sortBy)?.label || "Posição";
 
   return `
     <h1 class="view-title">Elenco</h1>
-    <p class="view-sub">${s.squad.length} jogadores · ${report.fitCount} aptos · média OVR ${avg}</p>
+    <p class="view-sub">${s.squad.length} jogadores · ${report.fitCount} aptos · média OVR ${avg} · ordem: ${sortLabel}</p>
     ${warnHtml ? `<div class="panel">${warnHtml}</div>` : ""}
+    <div class="panel">
+      <div class="tabs squad-sort-tabs" role="toolbar" aria-label="Ordenar elenco">
+        ${SQUAD_SORTS.map((opt) => squadSortBtn(opt.id, opt.label, sortBy === opt.id)).join("")}
+      </div>
+      <p class="micro-help" style="margin:0.45rem 0 0">
+        Padrão: <strong>posição</strong> (Goleiro → Zagueiro → … → Atacante). Clique para mudar.
+      </p>
+    </div>
     <div class="panel table-wrap">
       <table class="data">
         <thead><tr>
-          <th>Pos</th><th>Nome</th><th>OVR</th><th>Forma</th><th>Sta</th><th>Moral</th><th>Status</th><th>Valor</th><th></th>
+          <th><button type="button" class="linkish squad-th-sort ${sortBy === "pos" ? "is-active" : ""}" data-squad-sort="pos" title="Ordenar por posição">Pos${sortBy === "pos" ? " ▾" : ""}</button></th>
+          <th>Nome</th>
+          ${thSort("ovr", "OVR", sortBy)}
+          ${thSort("form", "Forma", sortBy)}
+          ${thSort("sta", "Sta", sortBy)}
+          ${thSort("morale", "Moral", sortBy)}
+          <th>Status</th>
+          ${thSort("value", "Valor", sortBy)}
+          <th></th>
         </tr></thead>
-        <tbody>${rows}</tbody>
+        <tbody>${rows.join("")}</tbody>
       </table>
     </div>`;
 }

@@ -894,6 +894,37 @@ table.data .pos {
   color: var(--green);
 }
 
+/* Elenco: cabeçalhos de posição e ordenação */
+.squad-sort-tabs {
+  margin-bottom: 0;
+}
+tr.squad-pos-group td {
+  padding: 0.55rem 0.65rem 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid var(--border);
+}
+tr.squad-pos-group .pos {
+  margin-right: 0.35rem;
+}
+button.squad-th-sort {
+  font: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+button.squad-th-sort:hover,
+button.squad-th-sort.is-active {
+  color: var(--green);
+}
+
 .select-inline {
   width: auto;
   min-width: 140px;
