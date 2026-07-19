@@ -81,8 +81,9 @@ body {
   line-height: var(--leading);
   overflow-x: hidden;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(62, 207, 106, 0.12), transparent),
-    linear-gradient(180deg, #0b0f0c 0%, #0e1410 100%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--bg-glow), transparent),
+    linear-gradient(180deg, var(--bg-grad-top) 0%, var(--bg-grad-bottom) 100%);
+  transition: background-color 0.25s ease, color 0.2s ease;
 }
 
 #app {
@@ -120,7 +121,7 @@ select:focus-visible,
   padding: 0.65rem 0.9rem;
   border-radius: var(--radius-sm);
   background: var(--green);
-  color: #041208;
+  color: var(--on-accent);
   font-weight: 700;
   transform: translateY(-150%);
 }
@@ -155,7 +156,7 @@ select {
 input:focus,
 select:focus {
   border-color: var(--green-dim);
-  box-shadow: 0 0 0 3px rgba(62, 207, 106, 0.12);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14);
 }
 
 img,
@@ -293,8 +294,8 @@ video {
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #3ecf6a 0%, #249a48 100%);
-  color: #041208;
+  background: linear-gradient(180deg, var(--btn-primary-from) 0%, var(--btn-primary-to) 100%);
+  color: var(--on-accent);
 }
 
 .btn-secondary {

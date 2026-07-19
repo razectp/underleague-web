@@ -1,22 +1,34 @@
 /**
  * Design tokens — Under League
  * Única fonte de verdade para cor, espaço, tipo e shell de layout.
+ *
+ * Temas (data-theme no <html>):
+ *   pitch     — padrão (base neutra + acento verde)
+ *   midnight  — noturno azulado
+ *   graphite  — grafite + dourado
+ *   ember     — carvão quente + âmbar
  */
 
 :root {
-  /* —— Color —— */
-  --bg: #0b0f0c;
-  --bg-2: #121a14;
-  --bg-3: #1a261c;
-  --panel: #152018;
-  --panel-2: #1c2b20;
-  --border: #2a3d2e;
-  --border-hot: #3d6b45;
-  --text: #d8e6d9;
-  --muted: #8aa08c;
-  --dim: #78917c;
-  --green: #3ecf6a;
-  --green-dim: #1f7a3c;
+  /*
+   * Campo (padrão): base carvão neutra; verde só no acento.
+   * Evita “tudo tingido de verde” — painéis e texto legíveis.
+   */
+  --bg: #0d0f10;
+  --bg-2: #15181a;
+  --bg-3: #1c2023;
+  --panel: #171b1d;
+  --panel-2: #1f2427;
+  --border: #2c3338;
+  --border-hot: #3d4a42;
+  --text: #e8ecea;
+  --muted: #9aa3a0;
+  --dim: #7e8784;
+  /* Acento: verde de gramado, sem neon */
+  --green: #5cbf7a;
+  --green-dim: #3a8a54;
+  --accent-rgb: 92, 191, 122;
+  --on-accent: #07140c;
   --gold: #e2b84a;
   --gold-dim: #8a6a1f;
   --red: #e05555;
@@ -25,16 +37,24 @@
   --orange: #e08945;
   --purple: #9b7bde;
 
+  /* Glow / botão primário — glow discreto */
+  --accent-glow: rgba(var(--accent-rgb), 0.1);
+  --btn-primary-from: #5cbf7a;
+  --btn-primary-to: #3a8a54;
+  --bg-glow: rgba(var(--accent-rgb), 0.06);
+  --bg-grad-top: #0d0f10;
+  --bg-grad-bottom: #101314;
+
   /* —— Elevation —— */
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
 
   /* —— Scrollbars (tema do site) —— */
   --scroll-size: 10px;
-  --scroll-track: #0e1510;
-  --scroll-thumb: #2a3d2e;
-  --scroll-thumb-hover: #3d6b45;
-  --scroll-thumb-active: #3ecf6a;
+  --scroll-track: #101314;
+  --scroll-thumb: #2c3338;
+  --scroll-thumb-hover: #3d4a42;
+  --scroll-thumb-active: #5cbf7a;
 
   /* —— Radius —— */
   --radius-sm: 6px;
@@ -86,4 +106,120 @@
   --z-modal: 90;
   --z-toast: 100;
   --z-fx: 110;
+
+  color-scheme: dark;
+}
+
+/* —— Noturno: azul-ardósia —— */
+html[data-theme="midnight"] {
+  --bg: #0b0f16;
+  --bg-2: #121826;
+  --bg-3: #1a2233;
+  --panel: #151c2b;
+  --panel-2: #1c2638;
+  --border: #2a3548;
+  --border-hot: #3d516e;
+  --text: #e6ebf4;
+  --muted: #9aa8bd;
+  --dim: #7d8ba0;
+  --green: #6eb6ff;
+  --green-dim: #3a6fa8;
+  --accent-rgb: 110, 182, 255;
+  --on-accent: #061018;
+  --gold: #e2b84a;
+  --gold-dim: #8a6a1f;
+  --btn-primary-from: #6eb6ff;
+  --btn-primary-to: #3d7ec4;
+  --bg-glow: rgba(110, 182, 255, 0.1);
+  --bg-grad-top: #0b0f16;
+  --bg-grad-bottom: #0e131c;
+  --scroll-track: #0c111a;
+  --scroll-thumb: #2a3548;
+  --scroll-thumb-hover: #3d516e;
+  --scroll-thumb-active: #6eb6ff;
+}
+
+/* —— Grafite: neutro + dourado (zero cast verde) —— */
+html[data-theme="graphite"] {
+  --bg: #101214;
+  --bg-2: #171a1d;
+  --bg-3: #1f2429;
+  --panel: #1a1e22;
+  --panel-2: #23282e;
+  --border: #32383f;
+  --border-hot: #4a525c;
+  --text: #eceff1;
+  --muted: #a0a8b0;
+  --dim: #848c96;
+  --green: #d4b15a;
+  --green-dim: #8a7030;
+  --accent-rgb: 212, 177, 90;
+  --on-accent: #161208;
+  --gold: #e8c66a;
+  --gold-dim: #8a6a1f;
+  --btn-primary-from: #d4b15a;
+  --btn-primary-to: #a8842e;
+  --bg-glow: rgba(212, 177, 90, 0.08);
+  --bg-grad-top: #101214;
+  --bg-grad-bottom: #121518;
+  --scroll-track: #0e1012;
+  --scroll-thumb: #32383f;
+  --scroll-thumb-hover: #4a525c;
+  --scroll-thumb-active: #d4b15a;
+}
+
+/* —— Derby: carvão quente + âmbar —— */
+html[data-theme="ember"] {
+  --bg: #120e0c;
+  --bg-2: #1c1512;
+  --bg-3: #281c17;
+  --panel: #211814;
+  --panel-2: #2c201a;
+  --border: #3d2e26;
+  --border-hot: #6b4a38;
+  --text: #f0e8e2;
+  --muted: #b0a094;
+  --dim: #8f8176;
+  --green: #e08945;
+  --green-dim: #9a5528;
+  --accent-rgb: 224, 137, 69;
+  --on-accent: #1a0e06;
+  --gold: #f0c050;
+  --gold-dim: #8a6a1f;
+  --btn-primary-from: #e08945;
+  --btn-primary-to: #b05a22;
+  --bg-glow: rgba(224, 137, 69, 0.1);
+  --bg-grad-top: #120e0c;
+  --bg-grad-bottom: #16100d;
+  --scroll-track: #100c0a;
+  --scroll-thumb: #3d2e26;
+  --scroll-thumb-hover: #6b4a38;
+  --scroll-thumb-active: #e08945;
+}
+
+/* Alias explícito do padrão (mesmos tokens de :root) */
+html[data-theme="pitch"] {
+  --bg: #0d0f10;
+  --bg-2: #15181a;
+  --bg-3: #1c2023;
+  --panel: #171b1d;
+  --panel-2: #1f2427;
+  --border: #2c3338;
+  --border-hot: #3d4a42;
+  --text: #e8ecea;
+  --muted: #9aa3a0;
+  --dim: #7e8784;
+  --green: #5cbf7a;
+  --green-dim: #3a8a54;
+  --accent-rgb: 92, 191, 122;
+  --on-accent: #07140c;
+  --btn-primary-from: #5cbf7a;
+  --btn-primary-to: #3a8a54;
+  --bg-glow: rgba(92, 191, 122, 0.06);
+  --bg-grad-top: #0d0f10;
+  --bg-grad-bottom: #101314;
+  --scroll-track: #101314;
+  --scroll-thumb: #2c3338;
+  --scroll-thumb-hover: #3d4a42;
+  --scroll-thumb-active: #5cbf7a;
 }

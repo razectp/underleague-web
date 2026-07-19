@@ -20,6 +20,9 @@ import {
 import { enableServerAuthority } from "./net/serverAuthority.js";
 import { managerName } from "./data/generators.js";
 import { refreshLobby, fillDemoCredentials } from "./ui/lobby.js";
+import { applyThemeFromPrefs } from "./ui/theme.js";
+
+applyThemeFromPrefs();
 
 const app = createApp(game);
 game.toastVia = toast;

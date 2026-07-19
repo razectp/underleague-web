@@ -12,6 +12,7 @@ import { setCompeteTab } from "./guidance.js";
 import { openLiveMatch } from "./liveMatch.js";
 import { presentActionFx } from "./fx.js";
 import { savePrefs } from "../systems/prefs.js";
+import { setTheme } from "./theme.js";
 
 /**
  * @param {import('../game/Game.js').Game} game
@@ -80,6 +81,22 @@ export function bindViewEvents(game, app) {
       );
     };
   }
+
+  root.querySelectorAll("[data-theme-pick]").forEach((btn) => {
+    btn.onclick = () => {
+      const id = setTheme(btn.dataset.themePick);
+      const label =
+        id === "midnight"
+          ? "Noturno"
+          : id === "graphite"
+            ? "Grafite"
+            : id === "ember"
+              ? "Derby"
+              : "Campo";
+      toast(`Tema: ${label}`, "info");
+      app.render();
+    };
+  });
 
   // Navegação data-go: delegação global em App.js (main + trilho)
 

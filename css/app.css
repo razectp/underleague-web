@@ -1,10 +1,10 @@
-﻿/**
- * Componentes e views â€” Under League
- * Layout/shell/botÃµes base: foundation.css
+/**
+ * Componentes e views — Under League
+ * Layout/shell/botões base: foundation.css
  * Tokens: tokens.css
  */
 
-/* â€”â€” Boot / portal cards â€”â€” */
+/* —— Boot / portal cards —— */
 .boot-wrap {
   max-width: 720px;
   margin: 0 auto;
@@ -22,7 +22,7 @@
   padding: 0.35rem 0.7rem;
   border-radius: var(--radius-pill);
   margin-bottom: 1.25rem;
-  background: rgba(62, 207, 106, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 
 .logo {
@@ -80,7 +80,7 @@
   font-family: var(--mono);
 }
 
-/* â€”â€” Topbar â€”â€” */
+/* —— Topbar —— */
 .topbar {
   display: flex;
   align-items: center;
@@ -116,8 +116,8 @@
   place-items: center;
   font-family: var(--display);
   font-size: 0.75rem;
-  background: linear-gradient(135deg, var(--green), #1a5c30);
-  color: #041208;
+  background: linear-gradient(135deg, var(--green), var(--green-dim));
+  color: var(--on-accent);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -235,7 +235,7 @@
   display: none;
 }
 
-/* â€”â€” Sidebar chrome (shell size vem da foundation) â€”â€” */
+/* —— Sidebar chrome (shell size vem da foundation) —— */
 .sidebar {
   border-right: 1px solid var(--border);
   background: var(--bg-2);
@@ -281,7 +281,7 @@
 }
 
 .nav-item.active {
-  background: rgba(62, 207, 106, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   border-color: var(--green-dim);
   color: var(--green);
   font-weight: 600;
@@ -328,7 +328,7 @@
   display: none !important;
 }
 
-/* â€”â€” Home: loop + prÃ³xima aÃ§Ã£o (visual; estrutura = foundation) â€”â€” */
+/* —— Home: loop + próxima ação (visual; estrutura = foundation) —— */
 .loop-guide {
   display: flex;
   flex-wrap: wrap;
@@ -337,7 +337,7 @@
   padding: 0.7rem 0.9rem;
   margin-bottom: 0.85rem;
   border-radius: var(--radius);
-  background: rgba(62, 207, 106, 0.06);
+  background: rgba(var(--accent-rgb), 0.06);
   border: 1px solid var(--green-dim);
   font-size: 0.86rem;
   color: var(--text);
@@ -367,7 +367,7 @@
 
 .next-action.is-primary {
   border-color: var(--green-dim);
-  box-shadow: 0 0 0 1px rgba(62, 207, 106, 0.12);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
 }
 
 .next-action-kicker {
@@ -428,7 +428,7 @@
   margin-left: 0.15rem;
 }
 
-/* â€”â€” Compete tabs â€”â€” */
+/* —— Compete tabs —— */
 .compete-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -467,7 +467,7 @@
 
 .compete-tab.active {
   border-color: var(--green);
-  background: rgba(62, 207, 106, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   color: var(--green);
 }
 
@@ -509,7 +509,7 @@
   margin: 0;
 }
 
-/* â€”â€” Rail chrome â€”â€” */
+/* —— Rail chrome —— */
 .rail {
   border-left: 1px solid var(--border);
   background: var(--bg-2);
@@ -656,7 +656,7 @@ table.data td {
   border-bottom: 1px solid rgba(42, 61, 46, 0.55);
   vertical-align: middle;
 }
-table.data tr:hover td { background: rgba(62, 207, 106, 0.04); }
+table.data tr:hover td { background: rgba(var(--accent-rgb), 0.04); }
 table.data .num { font-family: var(--mono); font-size: 0.82rem; }
 table.data .pos {
   font-family: var(--mono);
@@ -676,12 +676,12 @@ table.data .pos {
   border-radius: 4px;
   border: 1px solid var(--border);
 }
-.badge.ok { color: var(--green); border-color: var(--green-dim); background: rgba(62,207,106,0.08); }
+.badge.ok { color: var(--green); border-color: var(--green-dim); background: rgba(var(--accent-rgb),0.08); }
 .badge.warn { color: var(--orange); border-color: #7a4a20; background: rgba(224,137,69,0.1); }
 .badge.bad { color: #ff9a9a; border-color: var(--red-dim); background: rgba(224,85,85,0.1); }
 .badge.muted { color: var(--dim); }
 
-/* action-list / action-card: estrutura na foundation — só detalhes aqui */
+/* action-list / action-card: estrutura na foundation � s� detalhes aqui */
 .action-card .meta {
   font-family: var(--mono);
   font-size: 0.78rem;
@@ -695,7 +695,7 @@ table.data .pos {
   font-size: 0.82rem;
   padding: 0.55rem 0.7rem;
   border-left: 3px solid var(--green-dim);
-  background: rgba(62, 207, 106, 0.06);
+  background: rgba(var(--accent-rgb), 0.06);
   margin-bottom: 0.45rem;
   color: var(--text);
 }
@@ -741,7 +741,7 @@ table.data .pos {
   gap: 0.6rem;
   background:
     linear-gradient(180deg, rgba(30,80,40,0.25), rgba(10,20,12,0.4)),
-    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(62,207,106,0.05) 28px, rgba(62,207,106,0.05) 29px);
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(var(--accent-rgb),0.05) 28px, rgba(var(--accent-rgb),0.05) 29px);
   border: 1px solid var(--border-hot);
   border-radius: 12px;
   padding: 1rem;
@@ -801,7 +801,7 @@ table.data .pos {
 .influence-card:hover { border-color: var(--border-hot); }
 .influence-card.leading {
   border-color: var(--green-dim);
-  background: rgba(62, 207, 106, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 .influence-card h4 { font-size: 0.9rem; margin-bottom: 0.25rem; }
 .influence-card p { font-size: 0.78rem; color: var(--muted); }
@@ -889,12 +889,12 @@ table.data .pos {
   font-size: 0.82rem;
 }
 .tab.active {
-  background: rgba(62, 207, 106, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
   border-color: var(--green-dim);
   color: var(--green);
 }
 
-/* Elenco: cabeçalhos de posição e ordenação */
+/* Elenco: cabe�alhos de posi��o e ordena��o */
 .squad-sort-tabs {
   margin-bottom: 0;
 }
@@ -947,7 +947,7 @@ button.squad-th-sort.is-active {
   min-width: 0;
 }
 
-/* Responsive — só componentes; shell está na foundation */
+/* Responsive � s� componentes; shell est� na foundation */
 @media (max-width: 980px) {
   .topbar {
     gap: 0.5rem;
@@ -1195,11 +1195,11 @@ button.squad-th-sort.is-active {
   margin-right: 2px;
   font-weight: 600;
 }
-.form-dot.win { background: rgba(62, 207, 106, 0.2); color: var(--green); }
+.form-dot.win { background: rgba(var(--accent-rgb), 0.2); color: var(--green); }
 .form-dot.draw { background: rgba(226, 184, 74, 0.15); color: var(--gold); }
 .form-dot.loss { background: rgba(224, 85, 85, 0.15); color: #ff9a9a; }
 
-/* XP de skill (progressão lenta) */
+/* XP de skill (progress�o lenta) */
 .skill-xp { margin-top: 0.45rem; max-width: 320px; }
 .skill-xp-lbl {
   display: flex;
@@ -1309,7 +1309,7 @@ button.linkish:hover strong {
   .portal-links { grid-template-columns: 1fr; }
 }
 
-/* —— Live match broadcast —— */
+/* �� Live match broadcast �� */
 .live-match-root {
   position: fixed;
   inset: 0;
@@ -1347,7 +1347,7 @@ button.linkish:hover strong {
   font-family: var(--mono);
   font-size: 0.68rem;
   letter-spacing: 0.12em;
-  color: #041208;
+  color: var(--on-accent);
   background: var(--red);
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-pill);
@@ -1447,7 +1447,7 @@ button.linkish:hover strong {
 }
 .live-ev.goal {
   border-color: var(--green-dim);
-  background: rgba(62, 207, 106, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   font-weight: 600;
 }
 .live-ev.drama {
@@ -1480,11 +1480,11 @@ button.linkish:hover strong {
   100% { transform: scale(1); }
 }
 
-/* —— Live match drama FX —— */
+/* �� Live match drama FX �� */
 .live-scoreboard.is-goal-hit {
   animation: fx-scoreboard-hit 0.55s ease;
   border-color: var(--green);
-  box-shadow: 0 0 0 1px rgba(62, 207, 106, 0.35), 0 0 24px rgba(62, 207, 106, 0.18);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.35), 0 0 24px rgba(var(--accent-rgb), 0.18);
 }
 .live-scoreboard.is-drama-hit {
   animation: fx-scoreboard-hit 0.45s ease;
@@ -1505,7 +1505,7 @@ button.linkish:hover strong {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle at 50% 30%, rgba(62, 207, 106, 0.22), transparent 65%);
+  background: radial-gradient(circle at 50% 30%, rgba(var(--accent-rgb), 0.22), transparent 65%);
   animation: fx-goal-flash 0.55s ease forwards;
 }
 .live-match-panel {
@@ -1521,7 +1521,7 @@ button.linkish:hover strong {
   padding: 0.65rem 0.75rem;
   border-radius: var(--radius);
   border: 1px solid var(--border-hot);
-  background: linear-gradient(135deg, rgba(62, 207, 106, 0.14), rgba(0, 0, 0, 0.25));
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.14), rgba(0, 0, 0, 0.25));
   animation: fx-banner-in 0.4s ease;
 }
 .live-result-banner strong {
@@ -1555,7 +1555,7 @@ button.linkish:hover strong {
   background: rgba(155, 123, 222, 0.12);
 }
 
-/* —— Body-level FX (floaters / confetti) —— */
+/* �� Body-level FX (floaters / confetti) �� */
 .fx-root {
   position: fixed;
   inset: 0;
@@ -1651,6 +1651,61 @@ button.linkish:hover strong {
   .fx-float { font-size: 0.85rem; }
 }
 
+/* —— Theme picker —— */
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  text-align: left;
+  padding: 0.65rem 0.7rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+  min-width: 0;
+}
+.theme-card:hover {
+  border-color: var(--border-hot);
+}
+.theme-card.active {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.35);
+  background: rgba(var(--accent-rgb), 0.06);
+}
+.theme-card strong {
+  display: block;
+  font-size: 0.88rem;
+  margin-bottom: 0.15rem;
+}
+.theme-card p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.theme-swatches {
+  display: flex;
+  gap: 0.3rem;
+}
+.theme-swatch {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+@media (max-width: 560px) {
+  .theme-grid { grid-template-columns: 1fr; }
+}
+
 /* Cards compactos (ex.: tarefas na home) */
 .action-card-compact {
   padding: 0.55rem 0.65rem;
@@ -1669,7 +1724,7 @@ button.linkish:hover strong {
   color: var(--green, #3ecf6a);
 }
 
-/* Painel de operações (sem rota /admin) */
+/* Painel de opera��es (sem rota /admin) */
 .ops-wrap {
   max-width: 1200px;
 }

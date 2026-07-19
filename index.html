@@ -13,6 +13,20 @@
     Local: ""  |  Produção: "https://api.seudominio.com"
   -->
   <script src="config.js"></script>
+  <script>
+    /* Aplica tema antes do paint para evitar flash do verde padrão */
+    (function () {
+      try {
+        var raw = localStorage.getItem("underleague_prefs_v1");
+        var theme = raw ? JSON.parse(raw).theme : null;
+        var ok = { pitch: 1, midnight: 1, graphite: 1, ember: 1 };
+        if (theme && ok[theme]) document.documentElement.setAttribute("data-theme", theme);
+        else document.documentElement.setAttribute("data-theme", "pitch");
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "pitch");
+      }
+    })();
+  </script>
 </head>
 <body>
   <div id="app">
