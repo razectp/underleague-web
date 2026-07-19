@@ -283,14 +283,23 @@ export function claimMission(game, missionId) {
   if (m.progress < m.target) return { ok: false, msg: "Tarefa incompleta." };
 
   m.claimed = true;
-  grantRewards(game, { prize: m.prize, energy: m.energy || 0, rep: m.rep || 0 });
-  game.addXp(8 + (m.rep || 0) * 2);
+  const prize = m.prize || 0;
+  const energy = m.energy || 0;
+  const rep = m.rep || 0;
+  const xp = 8 + rep * 2;
+  grantRewards(game, { prize, energy, rep });
+  game.addXp(xp);
 
-  const parts = [`+R$ ${formatMoney(m.prize)}`];
-  if (m.energy) parts.push(`+${m.energy}⚡`);
-  if (m.rep) parts.push(`+${m.rep}★`);
+  const parts = [`+R$ ${formatMoney(prize)}`];
+  if (energy) parts.push(`+${energy}⚡`);
+  if (rep) parts.push(`+${rep}★`);
+  parts.push(`+${xp} XP`);
 
-  game.notify(`Tarefa: ${m.label} · ${parts.join(" · ")}`, "info");
+  const msg = `Tarefa: ${m.label} · ${parts.join(" · ")}`;
+  game.notify(msg, "info");
+
+  /** @type {null|{ prize: number, energy: number, rep: number, xp: number, label: string }} */
+  let fullClear = null;
 
   // Bônus se todas foram resgatadas
   const allClaimed = game.state.missions.items.every((x) => x.claimed);
@@ -299,6 +308,13 @@ export function claimMission(game, missionId) {
     const bonus = DAILY_FULL_CLEAR;
     grantRewards(game, bonus);
     game.addXp(15);
+    fullClear = {
+      prize: bonus.prize,
+      energy: bonus.energy,
+      rep: bonus.rep,
+      xp: 15,
+      label: bonus.label
+    };
     game.notify(
       `${bonus.label}! · +R$ ${formatMoney(bonus.prize)} · +${bonus.energy}⚡ · +${bonus.rep}★`,
       "info"
@@ -309,7 +325,14 @@ export function claimMission(game, missionId) {
   }
 
   game.commit();
-  return { ok: true };
+  return {
+    ok: true,
+    msg: fullClear
+      ? `${msg} · ${fullClear.label}!`
+      : msg,
+    rewards: { prize, energy, rep, xp },
+    fullClear
+  };
 }
 
 export function missionsSummary(game) {

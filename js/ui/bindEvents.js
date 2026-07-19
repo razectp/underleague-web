@@ -6,9 +6,12 @@
 import { $, toast, modal, textPromptModal } from "./dom.js";
 import { api, getToken } from "../net/api.js";
 import { playerDisplayName } from "../data/generators.js";
+import { formatMoney } from "../core/utils.js";
 import { escapeHtml as esc } from "./text.js";
 import { setCompeteTab } from "./guidance.js";
 import { openLiveMatch } from "./liveMatch.js";
+import { presentActionFx } from "./fx.js";
+import { savePrefs } from "../systems/prefs.js";
 
 /**
  * @param {import('../game/Game.js').Game} game
@@ -57,9 +60,26 @@ export function bindViewEvents(game, app) {
           : "info";
       toast(result.msg, kind);
     }
+    // FX de recompensa (body-level) antes do re-render da main
+    if (result && result.ok !== false) {
+      presentActionFx(result, { formatMoney, anchor: control });
+    }
     app.render();
     return result;
   };
+
+  const reduceMotionToggle = root.querySelector("#pref-reduce-motion");
+  if (reduceMotionToggle) {
+    reduceMotionToggle.onchange = () => {
+      savePrefs({ reduceMotion: !!reduceMotionToggle.checked });
+      toast(
+        reduceMotionToggle.checked
+          ? "Animações reduzidas."
+          : "Animações completas ativas.",
+        "info"
+      );
+    };
+  }
 
   // Navegação data-go: delegação global em App.js (main + trilho)
 

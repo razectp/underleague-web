@@ -638,7 +638,8 @@ export function playNextMatch(game) {
     ag,
     events,
     subtitle: `Liga · ${homeFit.reasons?.[0] || "confronto"}`,
-    footer: `+R$ ${formatMoney(prize)}${themeBonus ? ` · tema +R$ ${formatMoney(themeBonus)}` : ""}`
+    footer: `+R$ ${formatMoney(prize)}${themeBonus ? ` · tema +R$ ${formatMoney(themeBonus)}` : ""}`,
+    playerOutcome: playerWon ? "win" : playerDraw ? "draw" : "loss"
   });
   game.state.liveMatch = live;
 

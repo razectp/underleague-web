@@ -1,5 +1,6 @@
 import { formatMoney } from "../../core/utils.js";
 import { skillBar, ensureBossSkillXp } from "../../systems/skillProgress.js";
+import { loadPrefs } from "../../systems/prefs.js";
 
 function esc(value) {
   return String(value ?? "")
@@ -27,6 +28,7 @@ export function viewStatus(_game, s) {
   const b = s.boss;
   const st = b.stats;
   const skillXp = ensureBossSkillXp(b);
+  const prefs = loadPrefs();
 
   return `
     <h1 class="view-title">Técnico / presidente</h1>
@@ -87,5 +89,18 @@ export function viewStatus(_game, s) {
             : ""
         }
       </div>
+    </div>
+    <div class="panel">
+      <h3>Preferências de interface</h3>
+      <p style="color:var(--muted);font-size:0.88rem;line-height:1.5;margin-bottom:0.65rem">
+        Só neste aparelho — não altera o progresso do clube.
+      </p>
+      <label class="pref-check" for="pref-reduce-motion" style="display:flex;align-items:flex-start;gap:0.55rem;cursor:pointer">
+        <input type="checkbox" id="pref-reduce-motion" ${prefs.reduceMotion ? "checked" : ""} style="margin-top:0.2rem" />
+        <span>
+          <strong>Menos animações</strong><br>
+          <span style="color:var(--dim);font-size:0.82rem">Desliga confetti, shake de gol e números flutuantes. Também respeitamos a preferência do sistema.</span>
+        </span>
+      </label>
     </div>`;
 }

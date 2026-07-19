@@ -246,6 +246,8 @@ export function playCircuitMatch(game, rivalId) {
   );
   game.commit();
 
+  const circuitOutcome =
+    score.mine > score.theirs ? "win" : score.mine < score.theirs ? "loss" : "draw";
   const live = buildLiveSnapshot({
     mode: "circuit",
     home: game.state.club.name,
@@ -254,7 +256,8 @@ export function playCircuitMatch(game, rivalId) {
     ag: score.theirs,
     events: score.events,
     subtitle: `Circuito · volta ${playedTour} · ${matchup.reasons.join("; ")}`,
-    footer: `+R$ ${formatMoney(reward)}${starTxt} · objetivos ${stars}/3`
+    footer: `+R$ ${formatMoney(reward)}${starTxt} · objetivos ${stars}/3`,
+    playerOutcome: circuitOutcome
   });
   game.state.liveMatch = live;
 

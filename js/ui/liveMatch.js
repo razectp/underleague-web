@@ -9,6 +9,7 @@
 
 import { $ } from "./dom.js";
 import { loadPrefs, savePrefs } from "../systems/prefs.js";
+import { wantsMotion } from "./fx.js";
 
 let timer = null;
 let activeSession = null;
@@ -29,14 +30,13 @@ function kindClass(kind) {
   ) {
     return "live-ev goal";
   }
-  if (
-    kind === "penalty" ||
-    kind === "red" ||
-    kind === "second_yellow" ||
-    kind === "injury" ||
-    kind === "var" ||
-    kind === "woodwork"
-  ) {
+  if (kind === "red" || kind === "second_yellow") {
+    return "live-ev drama red";
+  }
+  if (kind === "penalty") {
+    return "live-ev drama penalty-wait";
+  }
+  if (kind === "injury" || kind === "var" || kind === "woodwork") {
     return "live-ev drama";
   }
   if (kind === "yellow" || kind === "foul" || kind === "handball" || kind === "offside") {
@@ -49,6 +49,15 @@ function kindClass(kind) {
   return "live-ev";
 }
 
+function isGoalKind(kind) {
+  return (
+    kind === "goal" ||
+    kind === "penalty_goal" ||
+    kind === "freekick_goal" ||
+    kind === "own_goal"
+  );
+}
+
 function ensureRoot() {
   let root = $("#live-match-root");
   if (!root) {
@@ -58,6 +67,23 @@ function ensureRoot() {
     document.body.appendChild(root);
   }
   return root;
+}
+
+/**
+ * @param {object} live
+ * @returns {{ title: string, cls: string, detail: string }}
+ */
+function resolveOutcome(live) {
+  const hg = live.finalHome;
+  const ag = live.finalAway;
+  const detail = `${live.home || "Mandante"} ${hg}–${ag} ${live.away || "Visitante"}`;
+  const outcome = live.playerOutcome; // "win" | "draw" | "loss" | undefined
+  if (outcome === "win") return { title: "VITÓRIA", cls: "win", detail };
+  if (outcome === "draw") return { title: "EMPATE", cls: "draw", detail };
+  if (outcome === "loss") return { title: "DERROTA", cls: "loss", detail };
+  if (hg > ag) return { title: "FIM DE JOGO", cls: "win", detail };
+  if (hg < ag) return { title: "FIM DE JOGO", cls: "loss", detail };
+  return { title: "FIM DE JOGO", cls: "draw", detail };
 }
 
 /**
@@ -78,6 +104,7 @@ export function openLiveMatch(live, opts = {}) {
   clearTimer();
   const root = ensureRoot();
   const prefs = loadPrefs();
+  const motion = wantsMotion();
   activeSession = {
     sessionId: live.sessionId,
     running: true,
@@ -86,7 +113,8 @@ export function openLiveMatch(live, opts = {}) {
     scoreH: 0,
     scoreA: 0,
     eventIndex: 0,
-    live
+    live,
+    motion
   };
 
   const state = activeSession;
@@ -108,7 +136,7 @@ export function openLiveMatch(live, opts = {}) {
         </div>
       </header>
 
-      <div class="live-scoreboard">
+      <div class="live-scoreboard" id="live-scoreboard">
         <div class="live-team" id="live-home">${escapeHtml(live.home)}</div>
         <div class="live-score">
           <span id="live-hg">0</span><span class="live-sep">–</span><span id="live-ag">0</span>
@@ -116,6 +144,8 @@ export function openLiveMatch(live, opts = {}) {
         </div>
         <div class="live-team" id="live-away">${escapeHtml(live.away)}</div>
       </div>
+
+      <div id="live-result-slot"></div>
 
       <div class="live-progress"><i id="live-bar" style="width:0%"></i></div>
 
@@ -127,6 +157,9 @@ export function openLiveMatch(live, opts = {}) {
       </footer>
     </div>`;
 
+  const panel = root.querySelector(".live-match-panel");
+  const scoreboard = root.querySelector("#live-scoreboard");
+  const resultSlot = root.querySelector("#live-result-slot");
   const feedEl = root.querySelector("#live-feed");
   const clockEl = root.querySelector("#live-clock");
   const hgEl = root.querySelector("#live-hg");
@@ -134,6 +167,33 @@ export function openLiveMatch(live, opts = {}) {
   const barEl = root.querySelector("#live-bar");
   const closeBtn = root.querySelector("#live-close");
   const footMsg = root.querySelector("#live-footer-msg");
+
+  const punchScore = (sideEl) => {
+    if (!state.motion || !sideEl) return;
+    sideEl.classList.remove("is-score-pop");
+    // reflow para reiniciar animação
+    void sideEl.offsetWidth;
+    sideEl.classList.add("is-score-pop");
+    setTimeout(() => sideEl.classList.remove("is-score-pop"), 560);
+  };
+
+  const flashPanel = (kind) => {
+    if (!state.motion || !panel || !scoreboard) return;
+    panel.classList.remove("is-goal-shake", "is-goal-flash");
+    scoreboard.classList.remove("is-goal-hit", "is-drama-hit");
+    void panel.offsetWidth;
+    if (kind === "goal") {
+      panel.classList.add("is-goal-shake", "is-goal-flash");
+      scoreboard.classList.add("is-goal-hit");
+      setTimeout(() => {
+        panel.classList.remove("is-goal-shake", "is-goal-flash");
+        scoreboard.classList.remove("is-goal-hit");
+      }, 560);
+    } else if (kind === "drama") {
+      scoreboard.classList.add("is-drama-hit");
+      setTimeout(() => scoreboard.classList.remove("is-drama-hit"), 480);
+    }
+  };
 
   /**
    * @param {object} ev
@@ -161,6 +221,8 @@ export function openLiveMatch(live, opts = {}) {
       hgEl.textContent = String(state.scoreH);
       agEl.textContent = String(state.scoreA);
       row.classList.add("pulse");
+      punchScore(ev.side === "home" ? hgEl : agEl);
+      flashPanel("goal");
     } else if (ev.kind === "own_goal") {
       // gol contra: side = quem cometeu → sobe pro adversário
       if (ev.side === "home") state.scoreA += 1;
@@ -168,6 +230,10 @@ export function openLiveMatch(live, opts = {}) {
       hgEl.textContent = String(state.scoreH);
       agEl.textContent = String(state.scoreA);
       row.classList.add("pulse");
+      punchScore(ev.side === "home" ? agEl : hgEl);
+      flashPanel("goal");
+    } else if (ev.kind === "red" || ev.kind === "second_yellow" || ev.kind === "penalty") {
+      flashPanel("drama");
     }
   };
 
@@ -178,6 +244,18 @@ export function openLiveMatch(live, opts = {}) {
     agEl.textContent = String(live.finalAway);
   };
 
+  const showResultBanner = () => {
+    if (!resultSlot) return;
+    const outcome = resolveOutcome(live);
+    const footerBit = live.footer ? `<span>${escapeHtml(live.footer)}</span>` : "";
+    resultSlot.innerHTML = `
+      <div class="live-result-banner ${outcome.cls}" role="status">
+        <strong>${escapeHtml(outcome.title)}</strong>
+        <span>${escapeHtml(outcome.detail)}</span>
+        ${footerBit}
+      </div>`;
+  };
+
   const finish = () => {
     clearTimer();
     state.running = false;
@@ -185,16 +263,17 @@ export function openLiveMatch(live, opts = {}) {
     clockEl.textContent = "90'";
     barEl.style.width = "100%";
 
-    // Despeja o resto do feed SEM somar gols de novo
+    // Despeja o resto do feed SEM somar gols de novo (e sem FX de placar)
     while (state.eventIndex < events.length) {
       appendEvent(events[state.eventIndex++], { updateScore: false });
     }
 
     // Placar final sempre do snapshot sealed (motor), nunca da contagem da UI
     applySealedScore();
+    showResultBanner();
 
     footMsg.textContent = live.footer || "Fim de jogo · abra o pós-jogo ao fechar";
-    closeBtn.textContent = "Ver pós-jogo";
+    closeBtn.textContent = live.mode === "circuit" ? "Fechar transmissão" : "Ver pós-jogo";
     closeBtn.classList.remove("hidden");
   };
 
@@ -217,13 +296,17 @@ export function openLiveMatch(live, opts = {}) {
       const ev = events[state.eventIndex++];
       appendEvent(ev);
       // Pausa dramática em lances-chave (sensação de ansiedade)
-      if (ev.drama && state.speed <= 2) {
+      if (ev.drama && state.speed <= 2 && state.motion) {
         clearTimer();
+        const pauseMs =
+          isGoalKind(ev.kind) || ev.kind === "penalty"
+            ? 900 / state.speed
+            : 450 / state.speed;
         setTimeout(() => {
-          if (!state.running && state.clock >= 90) return;
+          if (!state.running) return;
           if (state.clock >= 90) return;
           timer = setInterval(tick, Math.max(40, msPerMin));
-        }, ev.kind === "goal" || ev.kind === "penalty" ? 900 / state.speed : 450 / state.speed);
+        }, pauseMs);
         return;
       }
     }

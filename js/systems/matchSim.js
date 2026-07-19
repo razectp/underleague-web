@@ -740,6 +740,10 @@ export function simulateMatchNarrative({
   };
 }
 
+/**
+ * @param {object} opts
+ * @param {string} [opts.playerOutcome] "win" | "draw" | "loss" — perspectiva do clube do jogador
+ */
 export function buildLiveSnapshot({
   mode,
   home,
@@ -748,7 +752,8 @@ export function buildLiveSnapshot({
   ag,
   events,
   subtitle = "",
-  footer = ""
+  footer = "",
+  playerOutcome = null
 }) {
   return {
     sessionId: `live_${Date.now()}_${rand(1000, 9999)}`,
@@ -760,6 +765,9 @@ export function buildLiveSnapshot({
     events: (events || []).map((e) => ({ ...e })),
     subtitle,
     footer,
+    playerOutcome: playerOutcome === "win" || playerOutcome === "draw" || playerOutcome === "loss"
+      ? playerOutcome
+      : null,
     baseDurationMs: 120_000,
     createdAt: Date.now(),
     sealed: true
